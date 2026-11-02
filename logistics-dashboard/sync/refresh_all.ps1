@@ -39,13 +39,15 @@ Step 'FBA库龄×款号数据' "& `"$PY`" `"$WS\build_age_spu.py`"" 3
 Step 'FBA库龄×款号注入' "& `"$PY`" `"$WS\patch_age_spu_fba.py`"" 4
 Step 'SPU运营标注'   "& `"$PY`" `"$WS\patch_spu_owner.py`"" 4
 Step 'FBA指标风格统一' "& `"$PY`" `"$WS\patch_fba_kpi_style.py`"" 3
-Step '资料库发货记录' "& powershell -NoProfile -ExecutionPolicy Bypass -File `"$WS\refresh_data.ps1`" -PageUrl "$env:WB_PAGE_URL" -OutDir `"$WS\shandi-v5`"" 4
+Step '资料库发货记录' "& powershell -NoProfile -ExecutionPolicy Bypass -File `"$WS\refresh_data.ps1`" -PageUrl '$env:WB_PAGE_URL' -OutDir `"$WS\shandi-v5`"" 4
 Step '同步共享盘发货记录' "& powershell -NoProfile -ExecutionPolicy Bypass -File `"$WS\sync_share_xlsx.ps1`"" 2
 Step '生成发货记录主表' "& `"$PY`" `"$WS\build_records_from_share.py`"" 6
 
 Step '归档FBA库龄快照' "& `"$PY`" `"$WS\archive_wh_snapshot.py`"" 2
 Step 'FBA周趋势计算' "& `"$PY`" `"$WS\build_trend.py`"" 6
 Step 'FBA趋势交互注入' "& `"$PY`" `"$WS\patch_trend_ui.py`"" 4
+Step '店级库龄趋势数据' "& `"$PY`" `"$WS\build_age_trend.py`"" 6
+Step '店级库龄趋势注入' "& `"$PY`" `"$WS\patch_age_trend_ui.py`"" 4
 # 到仓进度补丁必须排在最后：前面任何步骤若整段替换 ⑥ SKU 批次面板的 JS，这里兜底补回
 Step '到仓进度修复'   "& `"$PY`" `"$WS\patch_sku_progress.py`"" 3
 
