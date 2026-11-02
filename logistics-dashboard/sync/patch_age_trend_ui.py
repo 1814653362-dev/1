@@ -5,14 +5,18 @@
 结构：{ ageBands:[5], weeks:[全周历], shops:[{sid,name,weeks[],series[{d,bands[5],total,old,oldPct,qty,spuCount}]}],
         shopsMeta:{sid:{...hardCheck}} }
 
-形态（2026-11-02 小丁要求）：
+形态（2026-11-02 小丁要求；11-02 主管复核后补 5 处）：
   · 每店一行 = 13 周五色堆叠柱（横向 13 根柱，五段色自下而上堆叠）
   · 可切段：只看某一个库龄段（0-90/91-180/181-270/271-365/365+）；不切段＝五段堆叠
   · 可切店：点行首店名 → 切到页面顶部的店铺筛选（走原有 fm-chip 点击，不新增流程）
-  · hover 某一根柱 → 玻璃浮层气泡：周结日 + 五段双数 + 合计
+  · hover 某一根柱 → 玻璃浮层气泡：**首行＝店名 + 周结日**（全部态 5 行时必须能认出是哪家），
+    下面五段双数 + 五段合计
   · 点某一根柱的某个色段 → 就地弹玻璃小卡片，显示该段 13 周单段走势（一条平滑曲线）
+  · 行首同时给出 **老库龄占比**（末个有效周，271 天以上）
+  · 全部态位置：各店明细表**之后**（对比表在上、趋势总览在下）；单店态：库龄条正下方
   · **绝对不出跨店合计**：一个店一行，不把多店加在一起
   · 无数据周留白（oldPct == null 视为空周，不当 0 造柱）；各周数值完全相同就不画（显示「—」）
+  · 周轴与柱对齐：轴左右各留 17px（= 行卡 1px 边框 + 16px 内距），与 SVG 内容区同宽
 
 视觉：五段色复用现有库龄条同一套 R5 色值（ACOL）；浮层一律 §6 浅色玻璃；页面卡片按 §8。
 红线：SKU 绝不跨店合并；不造数；末周五段必须与页面库龄条 summary.age 逐段相等（直接用数据，不另算）。
@@ -51,11 +55,12 @@ CSS = """/* ===== 店级库龄结构趋势·样式（2026-11-02） ===== */
 #lv1WhLayer .fm-aget-hd{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
 #lv1WhLayer .fm-aget-name{font-size:13px;font-weight:700;color:#0d3b5c;cursor:pointer;}
 #lv1WhLayer .fm-aget-name:hover{text-decoration:underline;}
-#lv1WhLayer .fm-aget-max{font-size:11.5px;font-weight:400;color:#5c6b7a;font-variant-numeric:tabular-nums;}
+#lv1WhLayer .fm-aget-max{font-size:11.5px;font-weight:400;color:#5c6b7a;font-variant-numeric:tabular-nums;margin-left:auto;}
+#lv1WhLayer .fm-aget-old{font-size:11.5px;font-weight:400;color:#5c6b7a;font-variant-numeric:tabular-nums;}
 #lv1WhLayer .fm-aget-svg{display:block;width:100%;height:auto;overflow:visible;}
 #lv1WhLayer .fm-aget-svg rect.fm-aget-seg{cursor:pointer;}
 #lv1WhLayer .fm-aget-svg rect.fm-aget-seg:hover{filter:brightness(.9);}
-#lv1WhLayer .fm-aget-axis{display:flex;margin-top:0;}
+#lv1WhLayer .fm-aget-axis{display:flex;margin-top:0;padding:0 17px;}
 #lv1WhLayer .fm-aget-axis span{flex:1 1 0;text-align:center;font-size:11px;color:#97a4b0;
   font-variant-numeric:tabular-nums;white-space:nowrap;}
 /* 柱悬停气泡：§6 浅色玻璃 */
@@ -64,8 +69,10 @@ CSS = """/* ===== 店级库龄结构趋势·样式（2026-11-02） ===== */
   -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
   border:1px solid rgba(255,255,255,.65);border-radius:10px;padding:8px 12px;
   font-size:12.5px;box-shadow:0 12px 32px rgba(15,23,42,.16),0 1px 2px rgba(15,23,42,.05),inset 0 1px 0 rgba(255,255,255,.9);}
-#lv1WhLayer .fm-atrend-tip .at-d{font-size:11.5px;color:#5c6b7a;margin-bottom:5px;padding-bottom:5px;
-  border-bottom:1px solid rgba(15,23,42,.12);}
+#lv1WhLayer .fm-atrend-tip .at-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid rgba(15,23,42,.12);}
+#lv1WhLayer .fm-atrend-tip .at-hd b{font-size:12.5px;font-weight:700;color:#0d3b5c;}
+#lv1WhLayer .fm-atrend-tip .at-hd span{font-size:11.5px;color:#5c6b7a;font-variant-numeric:tabular-nums;}
 #lv1WhLayer .fm-atrend-tip .at-r{display:flex;justify-content:space-between;gap:16px;line-height:1.75;}
 #lv1WhLayer .fm-atrend-tip .at-r span{font-size:12px;color:#5c6b7a;}
 #lv1WhLayer .fm-atrend-tip .at-r b{font-size:13px;font-weight:700;color:#16212e;font-variant-numeric:tabular-nums;}
@@ -143,6 +150,12 @@ JS = r"""  /* ===== 店级库龄结构趋势·交互（2026-11-02） ===== */
       return null;
     }
     function isEmpty(r){ return !r || r.oldPct == null; }
+    /* 末个有效周的老库龄占比（271 天以上），空周不算 */
+    function latestPct(sh){
+      var ss = (sh && sh.series) || [];
+      for(var i=ss.length-1;i>=0;i--){ if(ss[i] && ss[i].oldPct != null) return ss[i].oldPct; }
+      return null;
+    }
 
     /* ---------- 柱 ---------- */
     function rowSVG(sh){
@@ -205,8 +218,9 @@ JS = r"""  /* ===== 店级库龄结构趋势·交互（2026-11-02） ===== */
       var anchor = host.querySelector(".fm-segrow");
       if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
       else{
-        var tbl = host.querySelector("table");
-        if(tbl && tbl.parentNode) tbl.parentNode.insertBefore(wrap, tbl);   /* 全部态：放在各店明细表上方 */
+        /* 全部态：放在各店明细表之后（对比表在上、趋势总览在下，主次分明） */
+        var hero = host.querySelector(".fm-hero");
+        if(hero && hero.parentNode) hero.parentNode.insertBefore(wrap, hero.nextSibling);
         else host.appendChild(wrap);
       }
       wrap.setAttribute("data-sig", sig);
@@ -226,8 +240,10 @@ JS = r"""  /* ===== 店级库龄结构趋势·交互（2026-11-02） ===== */
         var sh = list[s2];
         var r = rowSVG(sh);
         var label = (band < 0) ? "峰值 " : KEY[band] + " 峰值 ";
+        var op = latestPct(sh);
         h += '<div class="fm-aget-row" data-sid="' + esc(sh.sid) + '">'
           + '<div class="fm-aget-hd"><span class="fm-aget-name" data-goto="' + esc(sh.sid) + '">' + esc(sh.name || sh.sid) + '<\/span>'
+          + '<span class="fm-aget-old">老库龄 ' + (op == null ? "—" : Number(op).toFixed(1) + "%") + '<\/span>'
           + '<span class="fm-aget-max">' + esc(label) + (r.max > 0 ? num(r.max) : "0") + ' 双<\/span><\/div>'
           + r.svg + '<\/div>';
       }
@@ -250,11 +266,11 @@ JS = r"""  /* ===== 店级库龄结构趋势·交互（2026-11-02） ===== */
       var r = recOf(sh, w);
       if(isEmpty(r)){ hideTip(); return; }
       var t = tipEl();
-      var h = '<div class="at-d">' + esc(w) + '<\/div>';
+      var h = '<div class="at-hd"><b>' + esc(sh.name || sh.sid) + '<\/b><span>' + esc(w) + '<\/span><\/div>';
       for(var k=0;k<5;k++){
         h += '<div class="at-r"><span>' + esc(KEY[k]) + '<\/span><b>' + num(r.bands[k]) + '<i>双<\/i><\/b><\/div>';
       }
-      h += '<div class="at-r at-sum"><span>合计<\/span><b>' + num(r.total) + '<i>双<\/i><\/b><\/div>';
+      h += '<div class="at-r at-sum"><span>五段合计<\/span><b>' + num(r.total) + '<i>双<\/i><\/b><\/div>';
       t.innerHTML = h;
       t.style.display = "block";
       var tw = t.offsetWidth || 180, th = t.offsetHeight || 120;
