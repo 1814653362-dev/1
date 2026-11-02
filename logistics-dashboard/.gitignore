@@ -1,0 +1,31 @@
+# 凭据与本地环境
+.env
+*.local
+
+# 业务数据与构建产物（本地从共享盘/领星生成，不入库）
+records.json
+records_wb_snapshot.json
+trend.json
+sku_index.json
+fba_sku_index.json
+age_spu.json
+spu_owner.json
+spu_owner_manual.json
+cost_override.json
+audit_plan.json
+audit_sync_state.json
+vol_preview.html
+*.bak
+*.bak-*
+*.log
+*.out
+*.err
+*.zip
+wh_raw/
+wh_raw_bak/
+wh_hist/
+lx_raw/
+data/
+wb-assets/
+__pycache__/
+*.pyc

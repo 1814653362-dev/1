@@ -1,0 +1,9 @@
+{
+  "_meta": {
+    "fetchedAt": "",
+    "source": "sample",
+    "note": "空壳样例：真实 records.json 由 sync/build_records_from_share.py 从共享盘发货记录生成，不入库（见 .gitignore）。本地起页面时复制为 records.json 即可。"
+  },
+  "main": [],
+  "sku": []
+}
