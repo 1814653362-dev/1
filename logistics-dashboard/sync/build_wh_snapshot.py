@@ -15,11 +15,11 @@ def num(v):
         return 0.0
 
 WAREHOUSES = [
-    {"wid": 17915, "name": "环新路仓库", "short": "环新路"},
-    {"wid": 9039, "name": "默认仓库", "short": "默认"},
-    {"wid": 26677, "name": "TK平台环新仓", "short": "TK"},
-    {"wid": 25024, "name": "Temu平台环新仓", "short": "Temu"},
-    {"wid": 31665, "name": "Shein平台环新仓", "short": "Shein"},
+    {"wid": 10001, "name": "示例仓库A", "short": "仓库A"},
+    {"wid": 10002, "name": "默认仓库", "short": "默认"},
+    {"wid": 10003, "name": "TK平台仓", "short": "TK"},
+    {"wid": 10004, "name": "Temu平台仓", "short": "Temu"},
+    {"wid": 10005, "name": "Shein平台仓", "short": "Shein"},
 ]
 
 # ---------- 本地仓 ----------

@@ -1,4 +1,4 @@
-﻿# refresh_all.ps1 —— 一条命令刷新「杉迪供应链货流」站点全部领星数据
+﻿# refresh_all.ps1 —— 一条命令刷新「供应链货流」站点全部领星数据
 # 用法： powershell -NoProfile -ExecutionPolicy Bypass -File refresh_all.ps1 [-SkipFetch] [-SkipPublish]
 # 流程：领星抓取 → 快照/索引构建 → 主页注入 → 资料库记录刷新 → 发布 → 校验
 # 注意：输出改为「先整体捕获再取末尾 N 行」。旧写法用 | Select-Object -First N 会在截断时

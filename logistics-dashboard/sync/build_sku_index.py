@@ -82,7 +82,7 @@ meta = {
     "asOf": today.isoformat(),
     "range3": [d3.isoformat(), today.isoformat()],
     "range6": [d6.isoformat(), today.isoformat()],
-    "stockScope": "国内 5 仓可用量合计（环新路/默认/TK/Temu/Shein），同 SKU 已合并",
+    "stockScope": "国内 5 仓可用量合计（仓库A/默认/TK/Temu/Shein），同 SKU 已合并",
     "outScope": "领星 FBA 货件出库数量（quantity_shipped）",
     "source": "领星 ERP 开放接口",
     "shipments": len(ships if isinstance(ships, list) else []),
