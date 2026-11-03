@@ -29,6 +29,9 @@ INHERIT_KEYS = ["货件状态", "物流状态", "入仓日期", "到港日期", 
 # 实测规范化结果与旧 WorkBuddy 主表逐月完全吻合（6月 84普/28快、9月 179/9、5月 62/11 …）。
 def ship_type_norm(raw):
     s = str(raw or "")
+    if "空运" in s:
+        # 2026-11-03 小丁：空运单独一类，不能跟海运（普船/快船）混算
+        return "空运"
     if ("美森" in s) or ("快船" in s) or ("快线" in s):
         return "快船"
     return "普船"

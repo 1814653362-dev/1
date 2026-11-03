@@ -52,6 +52,8 @@ Step '店级库龄趋势注入' "& `"$PY`" `"$WS\patch_age_trend_ui.py`"" 4
 Step '到仓进度修复'   "& `"$PY`" `"$WS\patch_sku_progress.py`"" 3
 # ② SKU成本统计：拆分表右侧加「发货日期」列（2026-11-03 小丁要求，便于定位是哪批货）
 Step '②发货日期列'   "& `"$PY`" `"$WS\patch_sku_shipdate.py`"" 4
+# 空运单独一类，不与海运混算（2026-11-03 小丁：2604021 的 4 月空运不能算进普船）
+Step '空运单列'   "& `"$PY`" `"$WS\patch_ship_air.py`"" 4
 
 if (-not $SkipPublish) {
   Step '发布上线' "& `"$PY`" `"$WS\publish_update.py`"" 6
