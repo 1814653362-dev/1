@@ -1,38 +1,75 @@
 # -*- coding: utf-8 -*-
-"""钉钉 AI 表格（Notable）MCP 客户端 —— stdio 握手 + 工具调用封装。
+"""钉钉 AI 表格（官方 dingtalk-mcp）Python 调用客户端 —— 复用 stdio 握手。
 
-依赖官方 npm 包 dingtalk-mcp：
-    npx -y dingtalk-mcp@latest
-本脚本负责以 stdio 方式拉起它，并把工具返回值（result.content[0].text 里的 JSON 字符串）解析成 dict。
-
-环境变量：
-    DINGTALK_NODE        node 可执行文件路径（默认 "node"）
-    DINGTALK_MCP_CLI     dingtalk-mcp 的 dist/cli.js 路径
-    DINGTALK_CLIENT_ID   钉钉应用 Client ID
-    DINGTALK_CLIENT_SECRET 钉钉应用 Client Secret
-    DINGTALK_ENV_FILE    .env 文件路径（可选）
-    DINGTALK_BASE_ID     AI 表格 baseId
-    DINGTALK_OPERATOR_ID 操作人 unionId
-    DINGTALK_SHEET_ID    数据表 id
+运行时路径**自动发现**（不写死本机路径，计划任务里也能跑）：
+    DINGTALK_TOOLS_DIR  运行时根目录（默认从本文件位置往上找 <activeDataDir>/tools）
+    DINGTALK_NODE       node 可执行文件（默认 <tools>/node-*/node.exe）
+    DINGTALK_MCP_CLI    dingtalk-mcp 的 dist/cli.js（默认 <tools>/dingtalk-mcp/node_modules/…）
+    DINGTALK_ENV_FILE   凭据 .env（默认 <tools>/dingtalk-mcp/.env）
+    DINGTALK_OPERATOR_ID / DINGTALK_BASE_ID  钉钉 unionId / AI 表格 baseId
 """
-import json, os, subprocess, sys, threading, time
+import glob, json, os, subprocess, sys, threading, time
 
 sys.stdout.reconfigure(encoding="utf-8")
 
-NODE = os.environ.get("DINGTALK_NODE", "node")
-CLI = os.environ.get("DINGTALK_MCP_CLI", "")
 
-OPERATOR = os.environ.get("DINGTALK_OPERATOR_ID", "")
-BASE = os.environ.get("DINGTALK_BASE_ID", "")
-SHEET_ID = os.environ.get("DINGTALK_SHEET_ID", "")
+def _tools_dir():
+    env = os.environ.get("DINGTALK_TOOLS_DIR")
+    if env:
+        return env
+    here = os.path.dirname(os.path.abspath(__file__))
+    for up in range(1, 7):
+        p = here
+        for _ in range(up):
+            p = os.path.dirname(p)
+        cand = os.path.join(p, "tools")
+        if os.path.isdir(cand):
+            return cand
+    return os.path.join(here, "tools")
+
+
+TOOLS = _tools_dir()
+
+
+def _find_node():
+    env = os.environ.get("DINGTALK_NODE")
+    if env:
+        return env
+    hits = sorted(glob.glob(os.path.join(TOOLS, "node-*", "node.exe")))
+    return hits[0] if hits else "node"
+
+
+def _find_cli():
+    env = os.environ.get("DINGTALK_MCP_CLI")
+    if env:
+        return env
+    hits = sorted(glob.glob(os.path.join(TOOLS, "dingtalk-mcp", "node_modules",
+                                         "dingtalk-mcp", "dist", "cli.js")))
+    return hits[0] if hits else ""
+
+
+def _env_file():
+    return os.environ.get("DINGTALK_ENV_FILE",
+                           os.path.join(TOOLS, "dingtalk-mcp", ".env"))
+
+
+NODE = _find_node()
+CLI = _find_cli()
+
+OPERATOR = os.environ.get("DINGTALK_OPERATOR_ID", "")   # 操作人 unionId（必填）
+BASE = os.environ.get("DINGTALK_BASE_ID", "")            # AI 表格 baseId（必填）
+# 各数据表 id 也走环境变量：主表 DINGTALK_SHEET_ID，其余按需加 DINGTALK_SHEET_ID_2…
+SHEETS = {}
 
 
 def _creds():
+    """从 .env 读凭据（不在代码里硬编码）。"""
     env = dict(os.environ)
+    env["PATH"] = os.path.dirname(NODE) + os.pathsep + env.get("PATH", "")
     env.setdefault("ACTIVE_PROFILES", "dingtalk-notable,dingtalk-contacts")
-    f = os.environ.get("DINGTALK_ENV_FILE", "")
+    f = _env_file()
     if f and os.path.exists(f):
-        for line in io.open(f, encoding="utf-8", errors="replace").read().splitlines():
+        for line in io_lines(f):
             line = line.strip()
             if not line or line.startswith("#") or "=" not in line:
                 continue
@@ -41,12 +78,15 @@ def _creds():
     return env
 
 
+def io_lines(path):
+    import io
+    return io.open(path, encoding="utf-8", errors="replace").read().splitlines()
+
+
 class DingTable:
-    def __init__(self, operator=None, base=None):
-        self.operator = operator or OPERATOR
-        self.base = base or BASE
-        if not self.operator or not self.base:
-            raise RuntimeError("缺少 DINGTALK_OPERATOR_ID / DINGTALK_BASE_ID 环境变量")
+    def __init__(self, operator=OPERATOR, base=BASE):
+        self.operator = operator
+        self.base = base
         self.p = subprocess.Popen([NODE, CLI], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                   stderr=subprocess.PIPE, env=_creds(), text=True, encoding="utf-8", bufsize=1)
         self.out = []
@@ -101,6 +141,7 @@ class DingTable:
         except Exception:
             return t
 
+    # ---- 便捷方法 ----
     def sheets(self):
         r = self.call("getNotableAllSheets", {"operatorId": self.operator, "baseId": self.base})
         return r.get("value") if isinstance(r, dict) else r
@@ -111,6 +152,7 @@ class DingTable:
         return r.get("value") if isinstance(r, dict) else r
 
     def records(self, sheet, max_results=100, timeout=90):
+        """分页拉全部记录。"""
         rows, token = [], None
         for _ in range(60):
             args = {"operatorId": self.operator, "baseId": self.base, "sheetIdOrName": sheet,
@@ -120,7 +162,8 @@ class DingTable:
             r = self.call("listNotableRecords", args, timeout=timeout)
             if not isinstance(r, dict):
                 return rows, r
-            rows.extend(r.get("records") or [])
+            rs = r.get("records") or []
+            rows.extend(rs)
             token = r.get("nextToken")
             if not r.get("hasMore") or not token:
                 break
@@ -135,11 +178,6 @@ class DingTable:
         return self.call("updateNotableRecords",
                          {"operatorId": self.operator, "baseId": self.base,
                           "sheetIdOrName": sheet, "records": records}, timeout=180)
-
-    def delete(self, sheet, record_ids):
-        return self.call("deleteNotableRecords",
-                         {"operatorId": self.operator, "baseId": self.base,
-                          "sheetIdOrName": sheet, "recordIds": record_ids}, timeout=180)
 
     def close(self):
         try:

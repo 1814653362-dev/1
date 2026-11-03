@@ -125,5 +125,12 @@ RunStep -Name '重建主表(领星覆盖货件状态)' -Arguments @("$WS\build_r
 RunStep -Name '发布上线' -Arguments @("$WS\publish_update.py") -Tail 6
 RunStep -Name '线上校验' -Arguments @("$WS\verify_page.py", 'https://REPLACE_WITH_YOUR_SITE_URL/index.html') -Tail 12
 
+# ---- 6) 同步钉钉 AI 表格「发货记录」----
+#   用户 2026-11-03 定：钉钉这张表每周填一次，跟着本任务（周一/周三）一起做，不挂 00:00 那条每日链路。
+#   源 = 公盘发货记录 Excel（本地副本 data\shipments_share.xlsx）→ 新增 + 按字段更新钉钉记录。
+#   凭据在 <activeDataDir>\tools\dingtalk-mcp\.env，node 运行时由 dt_mcp.py 自动发现。
+#   用 -NonFatal：钉钉同步失败不中断本流水线（站点已发布，数据不受影响）。
+RunStep -Name '同步钉钉AI表格' -Arguments @("$WS\dt_apply.py", '--apply') -Tail 12 -NonFatal
+
 Write-Host ("`nSKUBATCH DONE ok at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 exit 0
