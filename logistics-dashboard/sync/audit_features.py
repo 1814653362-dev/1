@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""三个关联功能的准确性核对（2026-10-30 小丁点名：这三个会联动别的功能，必须每次都对）。
+"""三个关联功能的准确性核对（2026-10-30 用户点名：这三个会联动别的功能，必须每次都对）。
 
 核对对象：
   ① SKU成本统计        —— 卡片②，engineSkuCost：命中 priced 记录汇总运费 ÷ 汇总件数 = 单件运费
@@ -32,7 +32,7 @@ REGION_BY_LABEL = {"美西": "us_west", "美东": "us_east", "美中": "us_centr
 REGION_ALL = ["us_west", "us_east", "us_central", "unknown"]
 REGION_LABELS = {"us_west": "美西", "us_east": "美东", "us_central": "美中", "unknown": "未知"}
 
-# 统一口径（2026-10-30 小丁定，页面同步中）：地区按「前缀归属」——
+# 统一口径（2026-10-30 用户定，页面同步中）：地区按「前缀归属」——
 # 美西*→us_west，美东*→us_east，美中*→us_central；空值与其余标签→unknown。
 # 页面当前 index.html:4272 仍是精确匹配 REGION_BY_LABEL[row["地区"]]，
 # 所以抽检时源复算一律用本前缀规则，页面侧差异标注「页面地区映射口径未同步」而非系统异常。
@@ -45,7 +45,7 @@ _PAGE_REGION_MODE = None
 def region_label_status(label):
     """返回 (归属地区, 是否未映射标签)。
 
-    统一口径（小丁 2026-10-30 定，页面同步中）：
+    统一口径（用户 2026-10-30 定，页面同步中）：
       空值            → unknown，非未映射（单独算「地区为空」一类计数）
       美西*/美东*/美中* → 对应地区，含子标签（美东南/美中北/美中南…）
       其余非空标签     → unknown，且是未映射标签（计入源数据质量缺口）
@@ -211,7 +211,7 @@ def norm_records(main_rows, region_mode="page"):
 
     region_mode:
       page   —— 镜像页面当前的映射口径（页面改了就跟着变，用于「页面真值 vs 复算」对账）
-      prefix —— 统一口径（前缀归属：小丁 2026-10-30 定，页面同步中），用于源侧复算
+      prefix —— 统一口径（前缀归属：用户 2026-10-30 定，页面同步中），用于源侧复算
     """
     out = []
     for row in main_rows or []:
@@ -500,7 +500,7 @@ def build_batches(sku_rows, records, page_const=None, today=None):
                    "deliver": dls[-1] if dls else None,
                    "region": region, "delivery_window": dw}
 
-    # 2026-11-02 小丁定：页面放开「最近3个月」窗口，改成「只显示还在途的货件」
+    # 2026-11-02 用户定：页面放开「最近3个月」窗口，改成「只显示还在途的货件」
     # （已入仓的老批次不显示；还没入仓的老批次照样显示）。
     keep = []
     for l in lines:
@@ -596,7 +596,7 @@ def page_constants():
 JS_FUNCS = ["num", "d10", "parseDate", "monthRangeFilter", "isFast", "effTransit", "avg1",
             "recentTransitStats", "splitSkus", "normSku", "recTokens", "skuAggregate",
             "monthKey", "normRow", "engineSkuCost", "engineAverage"]
-# 地区归属函数：页面用 regionOf(label) 做前缀归属（小刘 2026-10-30 同步），
+# 地区归属函数：页面用 regionOf(label) 做前缀归属（开发 2026-10-30 同步），
 # 老版本页面没有这个函数（直接 REGION_BY_LABEL 精确匹配），抽不到就跳过。
 JS_REGION_FUNCS = ["regionOf"]
 JS_VARS = [
@@ -719,7 +719,7 @@ skuRows.forEach(function (l) {
   l.meta = fbaMeta[l.fba.toUpperCase()] || { recs: [], ship: null, deliver: null, region: "unknown", delivery_window: null };
   l.batchKey = l.meta.ship ? l.meta.ship.slice(5, 10) : "未知";
 });
-/* 2026-11-02 小丁定：放开「最近3个月」窗口，改成「只显示还在途的货件」（与页面 build() 同口径）。
+/* 2026-11-02 用户定：放开「最近3个月」窗口，改成「只显示还在途的货件」（与页面 build() 同口径）。
    已入仓的老批次不显示；还没入仓的老批次照样显示。 */
 skuRows = skuRows.filter(function (l) {
   if (!l.meta || !l.meta.ship) return false;

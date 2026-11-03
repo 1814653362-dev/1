@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""修 ①②③ 卡片「最近N个月」的口径缺陷（2026-11-02 小丁指出：头程单价 1 块/几毛明显不可能）。
+"""修 ①②③ 卡片「最近N个月」的口径缺陷（2026-11-02 用户指出：头程单价 1 块/几毛明显不可能）。
 
 根因：`monthRangeFilter` 对**没有发货日期的记录一律保留**（`if (!d) return true`）。
      主表里有 46 条无发货日期的记录，全部在 11月/12月 tab（实为 2025-11/2025-12），
@@ -38,7 +38,7 @@ NEW1 = """  function monthRangeFilter(recs, months) {
         /* 无发货日期 → 按月份 tab 推断发货年月（1~10月=本年、11/12月=上年，与
            build_records_from_share.py 的 ym_of 同口径）。
            原来这里 return true（一律保留），把去年 11-12 月的零星小额碎料也算进了
-           「最近N个月」，运费均值被拉到几毛几分（2026-11-02 小丁指出头程 1 块不合理）。 */
+           「最近N个月」，运费均值被拉到几毛几分（2026-11-02 用户指出头程 1 块不合理）。 */
         var mm = monthKey(r.source_sheet);
         if (mm == null) return false;
         var yy = mm >= 11 ? ny - 1 : ny;
@@ -114,7 +114,7 @@ NEW2 = """    var tokens = splitSkus(body.sku).map(normSku).filter(function (x) 
     var _m = matchSku(timeRecs);
     var matched = _m.matched, mode = _m.mode;
     /* 时间窗口内查不到 → 回退到该 SKU 最近一次发货的月份（成本不会突变）。
-       2026-11-02 小丁要求「头程单价」必须是有意义的数，不能因为最近3个月没发货就空着。 */
+       2026-11-02 用户要求「头程单价」必须是有意义的数，不能因为最近3个月没发货就空着。 */
     if (!matched.length && tokens.length && !body.target_month) {
       var latestYm = null;
       all.forEach(function (r) {

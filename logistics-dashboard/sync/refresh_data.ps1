@@ -1,7 +1,7 @@
 ﻿# refresh_data.ps1 —— 从 WorkBuddy「发布为网站」页面拉取资料库数据，刷新站点数据快照
 # 用法：powershell -File refresh_data.ps1 -PageUrl "https://www.workbuddy.link/p/<pageId>"
 #
-# 降级策略（2026-11-02 小丁定）：
+# 降级策略（2026-11-02 用户定）：
 #   拉不到 WorkBuddy（发布页下线 / 接口失败 / 两个库取不齐）时，**不抛错中断**，
 #   改用工作区「最后一次好快照」data\records_wb_snapshot.json，打醒目告警
 #   「本次用快照，快照时间=xxx」，退出码 0；

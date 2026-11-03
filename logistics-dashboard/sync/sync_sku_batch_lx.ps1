@@ -7,7 +7,7 @@
 #       但这条是固定周一周三、不需要随机种子，不动 audit_plan.py 的抽检规则）。
 #       非周一/周三：只回一行提示就退出，不调接口、不发布。
 #
-# 数据来源口径（小丁 2026-10-30 亲口纠正，以此为准）：
+# 数据来源口径（用户 2026-10-30 亲口纠正，以此为准）：
 #   · SKU 批次明细 / 主表「货件状态」= 抓领星 API 的 shipment_status 维护的
 #     （shipment_id = 主表「FBA货件号」本体）。
 #   · 「预估到仓时间」才是系统推算的，页面每次打开实时重算 —— 本脚本不碰推算逻辑。
@@ -99,7 +99,7 @@ RunStep -Name '同步共享盘发货记录' -Arguments @("$WS\sync_share_xlsx.ps
 #   写回共享盘才能把历史月份也换成领星口径的送达日期。
 RunStep -Name '领星-FBA出库明细(货件状态)' -Arguments @("$WS\fetch_ship.ps1", '-OutDir', "$WS\lx_raw", '-Days', '400') -Tail 3
 
-# ---- 3b) 落盘「货件号 → receiving_time」映射（2026-11-02 小丁提、主管定）----
+# ---- 3b) 落盘「货件号 → receiving_time」映射（2026-11-02 用户提、主管定）----
 #   领星 receiving_time = 仓库开始接收时刻 = 真正的到仓时间，回填主表「送达日期」用。
 #   每次拉完领星就顺手落盘，保证写回用最新值而不是一次性快照。
 RunStep -Name '落盘领星接收时间映射' -Arguments @("$WS\lx_recv_time.py", '--lx', "$WS\lx_raw\shipments.json", '--out', "$WS\data\lx_recv_time.json") -Tail 3
@@ -123,7 +123,7 @@ RunStep -Name '重建主表(领星覆盖货件状态)' -Arguments @("$WS\build_r
 
 # ---- 5) 发布上线 + 线上校验 ----
 RunStep -Name '发布上线' -Arguments @("$WS\publish_update.py") -Tail 6
-RunStep -Name '线上校验' -Arguments @("$WS\verify_page.py", 'https://bok46b7dgj8iz.space.mcode.cn/index.html') -Tail 12
+RunStep -Name '线上校验' -Arguments @("$WS\verify_page.py", 'https://REPLACE_WITH_YOUR_SITE_URL/index.html') -Tail 12
 
 Write-Host ("`nSKUBATCH DONE ok at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 exit 0

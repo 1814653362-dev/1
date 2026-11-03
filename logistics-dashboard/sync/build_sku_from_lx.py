@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """build_sku_from_lx.py —— 用领星 SKU 明细（shipmentList 的 item_list）重建 SKU 备货明细。
 
-背景（2026-11-02 小丁/主管派活）：
+背景（2026-11-02 用户/主管派活）：
   站点的 SKU 备货明细现在取自 WorkBuddy 资料库「SKU备货明细」表（周级更新，且发布页可能下线）。
   领星 shipmentList 返回的 item_list 就是「SKU × 货件」级明细，字段含 sku / quantity_shipped，
   是更新更及时的来源。本脚本用它重建一份 SKU 明细，与 WorkBuddy 那份做对比。
 
-口径（照主管-小天核实的事实，别自创）：
+口径（照主管-主管核实的事实，别自创）：
   · join 键 = 主表 records.json 的「FBA货件号」。**只有主表有的货件才进**（领星有、主表没有的不进）。
   · FBA 货件号判据（团队记忆 fba.shipment-id-rule）：FBA + 9 位大写字母数字（共 12 位）；
     非 FBA 形态（RVSDGF-/RVG21468-/RVZJSD-/STAR-/「TR仓发」）不进 FBA 口径；

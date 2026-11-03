@@ -30,7 +30,7 @@ INHERIT_KEYS = ["货件状态", "物流状态", "入仓日期", "到港日期", 
 def ship_type_norm(raw):
     s = str(raw or "")
     if "空运" in s:
-        # 2026-11-03 小丁：空运单独一类，不能跟海运（普船/快船）混算
+        # 2026-11-03 用户：空运单独一类，不能跟海运（普船/快船）混算
         return "空运"
     if ("美森" in s) or ("快船" in s) or ("快线" in s):
         return "快船"
@@ -325,7 +325,7 @@ def main():
         print("未找到领星快照，本次「货件状态」只用 WorkBuddy 继承值")
 
     # ---- 领星「仓库接收时间」映射（回填送达日期用）----
-    # 2026-11-02 小丁提、主管定：领星货件转 RECEIVING 时记的时间 = receiving_time（仓库开始接收），
+    # 2026-11-02 用户提、主管定：领星货件转 RECEIVING 时记的时间 = receiving_time（仓库开始接收），
     # 就是真正的到仓时刻；用它回填主表「送达日期」空值 + 新增「仓库接收时间」列。
     # ⚠ 不用 gmt_modified（「更新时间」列）：会被后续编辑刷新，且比 receiving_time 晚约 1 天。
     recv_map, recv_meta = {}, {}
@@ -380,7 +380,7 @@ def main():
         sku_tbl = rec.get("sku", [])
         print("旧 records.json(%s): main %d / sku %d" % (os.path.basename(old_path), len(old_main), len(sku_tbl)))
 
-    # ---- SKU 备货明细：改用领星 item_list（2026-11-02 小丁/主管定：SKU 明细换领星，切断 WorkBuddy 依赖）----
+    # ---- SKU 备货明细：改用领星 item_list（2026-11-02 用户/主管定：SKU 明细换领星，切断 WorkBuddy 依赖）----
     # 领星 shipmentList.item_list 就是「SKU × 货件」级明细（quantity_shipped = 已发货），
     # 比 WorkBuddy 的 SKU 备货明细表更新及时、覆盖多。产物由 build_sku_from_lx.py 生成，
     # 比领星快照旧就按快照重建（保证每天跟最新领星一致）。
@@ -474,7 +474,7 @@ def main():
             ship = iso_date(g("date"), y, mth)
             arrive_raw = g("arrive")
             arrive = iso_date(arrive_raw, y, mth)
-            # 送达日期（2026-11-02 小丁定）：**共享盘新值优先**，旧 records.json 继承值兜底。
+            # 送达日期（2026-11-02 用户定）：**共享盘新值优先**，旧 records.json 继承值兜底。
             # 共享盘「送达时间」列(U) 已由领星 receiving_time 回填（仓库接收时刻），
             # 那是时效口径的新事实源；旧值优先会把刚写回去的领星值盖掉。
             # 继承的旧值若是平台 ISO 串（"YYYY-MM-DDTHH:MMZ"，平台把东八区零点存成 UTC），
@@ -542,7 +542,7 @@ def main():
                 # 仅作留档，不参与总运费计算。
                 "共享盘总费用": num(g("total_fee")),
             }
-            # 时效天数 / 全程天数（2026-11-02 小丁定：**按新的送达日期全部重算**）
+            # 时效天数 / 全程天数（2026-11-02 用户定：**按新的送达日期全部重算**）
             # 原来是从旧 records.json 继承旧值、只在缺失时才算 —— 那是「人工/账单旧口径」，
             # 共享盘「送达时间」列换成领星 receiving_time（仓库接收时刻）后必须全量重算，
             # 否则页面功能③的时效（effTransit 优先读「时效天数」列）还是旧口径。
@@ -574,7 +574,7 @@ def main():
             for dk in INHERIT_KEYS:
                 rec[dk] = (o or {}).get(dk, "") or ""
             # ---- 领星状态直接覆盖「货件状态」 ----
-            # 小丁 2026-10-30 口径：主表「货件状态」的事实源是领星 API 的 shipment_status，
+            # 用户 2026-10-30 口径：主表「货件状态」的事实源是领星 API 的 shipment_status，
             # 不是 WorkBuddy（那边一周才同步一次）。所以继承值只是兜底，建表阶段用领星覆盖。
             # 判定规则照抄 lx_status.py（与 ex/1-main/.../lx_sync_status.py 同口径）：
             # 到仓=RECEIVING/CLOSED/DELIVERED；终止态不写只报；领星在途但超 60 天未更新=陈旧不写只报。
@@ -593,10 +593,10 @@ def main():
                 except Exception as e:
                     print("  ⚠ 单行领星对碰异常（跳过该行）：%s" % e)
             # ---- 领星「仓库接收时间」回填 ----
-            # 2026-11-02 小丁提、主管定：领星 receiving_time = 仓库开始接收时刻 = 真正的到仓时间。
+            # 2026-11-02 用户提、主管定：领星 receiving_time = 仓库开始接收时刻 = 真正的到仓时间。
             # 规则：① 「仓库接收时间」列一律写领星原值（有就写，没有就空）；
             #       ② 「送达日期」列**只填空值**，已有的人工/账单值一字不动（两套语义不同，
-            #          全量换不换等小丁定）；新回填的值写成纯日期 YYYY-MM-DD。
+            #          全量换不换等用户定）；新回填的值写成纯日期 YYYY-MM-DD。
             if recv_map:
                 rids = [x.strip().upper() for x in str(fba or "").split("&") if x.strip()]
                 rinfo = None

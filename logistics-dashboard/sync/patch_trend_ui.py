@@ -26,7 +26,7 @@ IDX = os.path.join(BASE, "shandi-v5", "index.html")
 TREND = os.path.join(BASE, "shandi-v5", "trend.json")
 
 CSS = """/* ===== SPU 周度趋势·样式（2026-10-30） ===== */
-/* v2（2026-11-02 小丁要求）：弱化数据展示 —— 白色半透明磨砂玻璃浮层，卡内只留一条平滑库存波动曲线 */
+/* v2（2026-11-02 用户要求）：弱化数据展示 —— 白色半透明磨砂玻璃浮层，卡内只留一条平滑库存波动曲线 */
 #lv1WhLayer .fm-asp-tbl td.tc{cursor:pointer;}
 #lv1WhLayer .fm-asp-tbl td.tc:hover{background:#eaf2fa;color:#0d3b5c;}
 #lv1WhLayer .fm-asp-tbl td.tc.dn:hover{background:#fdeeee;color:#c8102e;}
@@ -62,7 +62,7 @@ CSS = """/* ===== SPU 周度趋势·样式（2026-10-30） ===== */
 """
 
 JS = r"""  /* ===== SPU 周度趋势·交互（2026-10-30） ===== */
-  /* v2（2026-11-02 小丁要求）：
+  /* v2（2026-11-02 用户要求）：
      ① 弱化数据展示 —— 点开不再弹「KPI 三数 + 周度明细表」的大卡片，改为一张白色半透明磨砂玻璃
         小卡片，卡内只有一条平滑的库存波动曲线（该 SPU 在该库龄段的双数波动），就地浮在被点的格子旁；
      ② 修掉「日期 数量」气泡关卡片后不消失的 bug —— 以前每次开卡片都往层里塞一个新气泡，

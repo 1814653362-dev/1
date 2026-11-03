@@ -5,7 +5,7 @@
   [switch]$SkipBackup
 )
 
-# unify_share_formats.ps1 —— 共享盘《发货记录.xlsx》日期/状态列格式统一（2026-11-02 小丁定）
+# unify_share_formats.ps1 —— 共享盘《发货记录.xlsx》日期/状态列格式统一（2026-11-02 用户定）
 #
 # 口径：
 #   · 「送达时间」列 → 全部非空值统一成「真 Excel 日期 + 数字格式 yyyy-mm-dd」

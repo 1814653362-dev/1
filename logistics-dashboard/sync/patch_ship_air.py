@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""空运单独成一类，不与海运（快船/普船）混算（2026-11-03 小丁提）。
+"""空运单独成一类，不与海运（快船/普船）混算（2026-11-03 用户提）。
 
 起因：SKU 2604021 在 2026-04-03 有一票空运（美东 / 美通 / 210 件 / 总运费 7606.06
      → 单件 ¥36.2193），主表规范化时「船型原文=空运」被判成了「普船」，
@@ -34,7 +34,7 @@ PAIRS = [
     # ① 引擎：isAir 辅助
     ('  function isFast(st) { return (st || "").indexOf("快") >= 0; }',
      '  function isFast(st) { return (st || "").indexOf("快") >= 0; }\n'
-     '  /* 空运单独一类（2026-11-03 小丁：空运不能跟海运混算） */\n'
+     '  /* 空运单独一类（2026-11-03 用户：空运不能跟海运混算） */\n'
      '  function isAir(st) { return (st || "").indexOf("空运") >= 0; }',
      "isAir 辅助", 1),
 
@@ -68,7 +68,7 @@ PAIRS = [
     # ④ 引擎：海运/空运分开聚合
     ('    var agg = skuAggregate(matched);\n\n    var byRegion = [];',
      '    var agg = skuAggregate(matched);\n'
-     '    /* 空运单独算：头条与船型拆分都不能把空运混进海运（2026-11-03 小丁） */\n'
+     '    /* 空运单独算：头条与船型拆分都不能把空运混进海运（2026-11-03 用户） */\n'
      '    var airRows = matched.filter(function (r) { return isAir(r.ship_type); });\n'
      '    var seaRows = matched.filter(function (r) { return !isAir(r.ship_type); });\n'
      '    var seaAgg = skuAggregate(seaRows);\n'
@@ -134,7 +134,7 @@ PAIRS = [
     ('  var EXPRESS_KEYS = ["美森", "快船", "快线"];\n'
      '  function isExpress(rec) {',
      '  var EXPRESS_KEYS = ["美森", "快船", "快线"];\n'
-     '  /* 空运（2026-11-03 小丁）：原文含「空运」的单独一类，不与海运混算 */\n'
+     '  /* 空运（2026-11-03 用户）：原文含「空运」的单独一类，不与海运混算 */\n'
      '  function isAirText(rec) {\n'
      '    var raw = String((rec && rec.channel) || (rec && rec.ship_type) || "");\n'
      '    return raw.indexOf("空运") >= 0;\n'
@@ -202,7 +202,7 @@ OLD_N = '''def ship_type_norm(raw):
 NEW_N = '''def ship_type_norm(raw):
     s = str(raw or "")
     if "空运" in s:
-        # 2026-11-03 小丁：空运单独一类，不能跟海运（普船/快船）混算
+        # 2026-11-03 用户：空运单独一类，不能跟海运（普船/快船）混算
         return "空运"
     if ("美森" in s) or ("快船" in s) or ("快线" in s):
         return "快船"

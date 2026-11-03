@@ -62,7 +62,7 @@ $y = (Get-Date).AddDays(-1)
 $yStr = $y.ToString('yyyy-MM-dd')
 Write-Host ("NIGHTLY start now={0} AsOf={1} ({2})" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), $yStr, $y.DayOfWeek)
 
-# 周末（2026-11-02 小丁定）：**不再整条跳过**。
+# 周末（2026-11-02 用户定）：**不再整条跳过**。
 #   · 仓库每天都有出入库 → 库存快照（国内仓/FBA 库存 → 库容占用、库存卡）必须天天拉，
 #     否则周一看到的还是周五的库存，落后 3 天。
 #   · 「发货记录类」（库存分类账 / FBA出库明细 / 分类账历史源）周末照旧跳过 —— 周末本来就没货要发。
@@ -86,7 +86,7 @@ RunStep -Name '领星-FBA出库明细' -Arguments @("$WS\fetch_ship.ps1") -Tail 
 RunStep -Name '构建+注入+发布+线上校验' -Arguments @("$WS\refresh_all.ps1", '-SkipFetch') -Tail 22 -MaxTry 3
 
 # 抽检已独立成「工作日随机三晚」定时任务（sch_ca0236f1ebbd → audit_plan.py 判定是否抽检夜 → nightly_audit_logistics.ps1）。
-# 2026-10-30 小丁定：00:00 这条链路只保留「拉数→构建→注入→发布→线上校验」，
+# 2026-10-30 用户定：00:00 这条链路只保留「拉数→构建→注入→发布→线上校验」，
 # 不再带抽检输出（抽检是抽样，不每晚做，省 token）。
 Write-Host ("`nNIGHTLY DONE ok at {0}" -f (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'))
 exit 0

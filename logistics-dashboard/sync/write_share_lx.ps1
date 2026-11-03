@@ -6,7 +6,7 @@
 
 # write_share_lx.ps1 —— 用 Excel COM 把领星数据写回共享盘发货记录的两列
 #
-# 口径（2026-11-02 小丁定）：
+# 口径（2026-11-02 用户定）：
 #   · Delivery window 列 ← 领星 shipment_status（照原样写英文枚举）
 #   · 送达时间 列         ← 领星 receiving_time 的日期部分，统一 YYYY-MM-DD（写成真日期，不是文本）
 #   · 缺这两列的 tab（7/6/5/4/1/2/3/12/11月）→ 在表尾新增这两列再写

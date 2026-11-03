@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """SPU 口径修正：只取第一个 “-” 之前的字段（如 230918-ND-S-Z → 230918）。
 按店铺聚合 SPU 库存并就地替换页面里的 window.__SPU 数据。
-红线（2026-10-28 小丁）：FBA 绝不跨店合并 —— 只输出 byShop，不再有顶层 all 合并层。
+红线（2026-10-28 用户）：FBA 绝不跨店合并 —— 只输出 byShop，不再有顶层 all 合并层。
 国内仓 SPU 走 build_spu_local.py（window.__SPUL），本地仓口径不属分店口径，不受此红线约束。"""
 import json, io, os, sys, collections
 sys.stdout.reconfigure(encoding="utf-8")
@@ -36,7 +36,7 @@ for r in fba.get("rows") or []:
     spu = spu_of(r.get("sku"))
     if not spu:
         continue
-    # 口径（2026-10-29 小丁纠正）：SPU 饼图必须与 FBA 卡 KPI 同源 → 用 FBA 可售
+    # 口径（2026-10-29 用户纠正）：SPU 饼图必须与 FBA 卡 KPI 同源 → 用 FBA 可售
     # afn_fulfillable_quantity；旧代码用 total（总库存），导致 Top8 占比 93.9% 与
     # 卡片 KPI「FBA 可售」对不上。available_total 含 FBM、total_fulfillable_quantity
     # 重复计数，都不能用。
