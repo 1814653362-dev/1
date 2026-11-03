@@ -93,13 +93,14 @@ PAIRS = [
         "byShip",
     ),
     # 4) shipments 每条补 ship_date
+    # 2026-11-04 修：空运补丁把同一段的 ship_type 改成了三分形式，原锚点整行不再匹配
+    #   → 补丁脚本每次 MISS 并让整条刷新链路失败。改成只锚 quantity 行 + 单独的「已打过」标记。
     (
-        """        ship_type: isFast(r.ship_type) ? "快船" : "普船",
-        quantity: Number(r.quantity || 0), box_count: Number(r.box_count || 0),""",
-        """        ship_type: isFast(r.ship_type) ? "快船" : "普船",
-        ship_date: r.ship_date || "",
+        """        quantity: Number(r.quantity || 0), box_count: Number(r.box_count || 0),""",
+        """        ship_date: r.ship_date || "",
         quantity: Number(r.quantity || 0), box_count: Number(r.box_count || 0),""",
         "shipments",
+        """ship_date: r.ship_date || "",""",
     ),
     # 5) 按地区拆分：加「发货日期」列
     (
@@ -161,8 +162,12 @@ PAIRS = [
 ]
 
 changed = []
-for old, new, tag in PAIRS:
-    if new in norm:
+for item in PAIRS:
+    old, new, tag = item[0], item[1], item[2]
+    # 「已打过」的判定标记：默认用整段新内容；可单独指定只认插入的那一行，
+    # 这样邻行被别人改过也不影响幂等判断（2026-11-04：空运补丁顶掉锚点导致链路失败）。
+    marker = item[3] if len(item) > 3 else new
+    if marker in norm:
         changed.append(tag + ":already")
         continue
     if old not in norm:
