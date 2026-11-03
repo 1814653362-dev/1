@@ -11,6 +11,8 @@
   · 只写 Excel 有的字段；Excel 没有的字段不动钉钉现值
   · Excel 单元格是 #N/A（公式错误）→ 跳过该字段，不写
   · number 类型字段只写能解析成数字的值，非数字（如 "25/26"）跳过并报告
+  · 「采购成本」是文本的行（如 "25/26"、"24.5/26"）→ 整行禁写，不进钉钉；
+    钉钉里若已有这类残留记录，直接删掉（用户 2026-11-03 定）
   · 钉钉里有、Excel 没有的历史残行 → 不删，只报告
 """
 import collections, io, json, os, sys
@@ -34,6 +36,23 @@ def is_num(v):
         return False
 
 
+def banned_keys(rows):
+    """Excel 里「采购成本」是文本（如 '25/26'、'24.5/26'）的行 → 禁写钉钉。
+
+    口径（用户 2026-11-03 定）：这类行不写进钉钉；
+    若钉钉里已有残留记录，直接删掉。
+    返回 {key: 原始值}。
+    """
+    out = {}
+    for r in rows:
+        v = str(r.get("采购成本") or "").strip()
+        if not v or is_num(v):
+            continue
+        f = dt_sync.to_ding_fields(r)
+        out[dt_sync.key_of(f)] = v
+    return out
+
+
 def main():
     target, rows, sheet1 = build_target(read_xlsx)
     all_rows, _ = build_excel_rows(read_xlsx, months=None)
@@ -43,9 +62,38 @@ def main():
     print("跳过(去年/不在范围)行数:", len(skipped),
           "| 涉及 tab:", sorted({r.get("_tab") for r in skipped}))
 
+    banned = banned_keys(rows)
+    if banned:
+        target = {k: v for k, v in target.items() if k not in banned}
+        print("采购成本为文本 → 禁写 %d 行:" % len(banned))
+        for k, v in banned.items():
+            print("    ", str(k), "采购成本=", repr(v))
+
     dt = DingTable()
+    sheet = os.environ.get("DINGTALK_SHEET_ID") or SHEETS.get("发货记录", "")
+    if not sheet:
+        raise RuntimeError("缺少数据表 id：请设 DINGTALK_SHEET_ID 环境变量")
     try:
         dt_rows, _ = dt.records(sheet, max_results=100)
+
+        # 钉钉里若残留「禁写行」→ 直接删掉（用户 2026-11-03 定）；干跑只报不删
+        del_ids = [r["id"] for r in dt_rows if dt_sync.key_of(r["fields"]) in banned]
+        if del_ids and not APPLY:
+            print("\n[dry-run] 残留禁写行 %d 条（加 --apply 才会删）:" % len(del_ids))
+            for k, v in banned.items():
+                print("    ", str(k), "采购成本=", repr(v))
+        elif del_ids:
+            print("\n=== 清理残留（采购成本为文本的行） ===")
+            print("  待删 %d 条:" % len(del_ids))
+            for k, v in banned.items():
+                print("    ", str(k), "采购成本=", repr(v))
+            dr = dt.delete(sheet, del_ids)
+            bad = isinstance(dr, dict) and (dr.get("code") or dr.get("errcode")
+                                            or dr.get("_error"))
+            print("  删除结果:", "失败 " + json.dumps(dr, ensure_ascii=False)[:300] if bad else "OK")
+            if not bad:
+                dt_rows, _ = dt.records(sheet, max_results=100)   # 重新拉，确认真删掉了
+
         missing, changed, same, extra, dt_map = diff(target, dt_rows)
 
         print("=== 方案 ===")
@@ -117,8 +165,9 @@ def main():
         m2, c2, s2, e2, _ = diff(target, dt2_rows)
         print("写入后：钉钉 %d 条 | 仍缺失 %d | 仍有差异 %d | 一致 %d | 多出 %d"
               % (len(dt2_rows), len(m2), len(c2), s2, len(e2)))
-        print("DINGTALK_SYNC ok | 新增 %d | 更新 %d | 表内 %d 条 | 仍缺失 %d | 仍有差异 %d"
-              % (len(inserts), len(updates), len(dt2_rows), len(m2), len(c2)))
+        print("DINGTALK_SYNC ok | 新增 %d | 更新 %d | 禁写 %d | 删残留 %d | 表内 %d 条 | 仍缺失 %d | 仍有差异 %d"
+              % (len(inserts), len(updates), len(banned), len(del_ids),
+                 len(dt2_rows), len(m2), len(c2)))
         if c2:
             fc = collections.Counter()
             for k, rid, diffs, f in c2:

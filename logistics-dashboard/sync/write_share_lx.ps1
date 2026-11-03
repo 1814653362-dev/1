@@ -23,7 +23,7 @@ if (-not (Test-Path -LiteralPath $Plan)) { throw "写回计划不存在：$Plan"
 
 # ---------- 1. 定位共享盘源文件 ----------
 function Find-Src {
-  $roots = @('\\Sd-fwq\F\物流部', 'W:\物流部')
+  $roots = @($env:WB_SHARE_ROOT, 'W:\物流部') | Where-Object { $_ } | Where-Object { $_ }
   foreach ($r in $roots) {
     if (-not (Test-Path -LiteralPath $r)) { continue }
     foreach ($n in @('发货记录xlsx.xlsx', '发货记录.xlsx')) {
@@ -37,7 +37,7 @@ function Find-Src {
   return $null
 }
 $Src = Find-Src
-if (-not $Src) { throw '共享盘发货记录找不到（已试 \\Sd-fwq\F\物流部 与 W:\物流部）' }
+if (-not $Src) { throw '共享盘发货记录找不到（请设置 WB_SHARE_ROOT 环境变量）' }
 Write-Host ("[write] SRC = " + $Src)
 
 # ---------- 2. 锁检测：文件被 Excel 打开就报错停下，绝不硬写 ----------

@@ -123,7 +123,7 @@ RunStep -Name '重建主表(领星覆盖货件状态)' -Arguments @("$WS\build_r
 
 # ---- 5) 发布上线 + 线上校验 ----
 RunStep -Name '发布上线' -Arguments @("$WS\publish_update.py") -Tail 6
-RunStep -Name '线上校验' -Arguments @("$WS\verify_page.py", 'https://REPLACE_WITH_YOUR_SITE_URL/index.html') -Tail 12
+RunStep -Name '线上校验' -Arguments @("$WS\verify_page.py", "$env:WB_SITE_URL/index.html") -Tail 12
 
 # ---- 6) 同步钉钉 AI 表格「发货记录」----
 #   用户 2026-11-03 定：钉钉这张表每周填一次，跟着本任务（周一/周三）一起做，不挂 00:00 那条每日链路。

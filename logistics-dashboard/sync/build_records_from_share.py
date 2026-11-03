@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """从共享盘「发货记录.xlsx」构建 records.json 的 main 表
-主源：共享盘 \\Sd-fwq\\F\\物流部\\发货记录.xlsx（12 个月度 tab）
+主源：共享盘发货记录.xlsx（目录见 WB_SHARE_ROOT）（12 个月度 tab）
 补充：旧 records.json 的对账字段 + 送达日期 + 箱规字典（按款号学）
 输出：shandi-v5/records.json
 """

@@ -179,6 +179,11 @@ class DingTable:
                          {"operatorId": self.operator, "baseId": self.base,
                           "sheetIdOrName": sheet, "records": records}, timeout=180)
 
+    def delete(self, sheet, record_ids):
+        return self.call("deleteNotableRecords",
+                         {"operatorId": self.operator, "baseId": self.base,
+                          "sheetIdOrName": sheet, "recordIds": list(record_ids)}, timeout=180)
+
     def close(self):
         try:
             self.p.terminate()
