@@ -78,7 +78,7 @@ JS = r"""
       h += '<th data-k="c' + i + '" class="' + on + '"><span class="sn">' + keys[i] + '</span>'
         + '<span class="sc">' + B[i].spuCount + ' 款号</span></th>';
     }
-    h += '<th data-k="old" class="' + (sk === "old" ? "on" : "") + '">老库龄</th>';
+    h += '<th data-k="old" class="' + (sk === "old" ? "on" : "") + '">271天以上</th>';
     h += '<th data-k="avail" class="' + (sk === "avail" ? "on" : "") + '">可售</th>';
     h += '<th data-k="total" class="' + (sk === "total" ? "on" : "") + '">总双数</th></tr></thead><tbody>';
     if(!list.length){
@@ -193,20 +193,41 @@ css_new = crlf(CSS).strip("\r\n") + "\r\n"
 i = html.find("#lv1WhLayer .fm-asp-tools{")
 cstat = "inserted"
 if i >= 0:
-    st = html.rfind("/* =====", 0, i)
-    en = html.find("\n/* ===== ", i)
-    assert st >= 0 and en > i, "css block bounds"
-    html = html[:st] + html[en + 1:]
+    # 定位「上一轮插入的整块 CSS」：段头必须在**行首**。
+    # 若段头前面带空格（插入锚点落在缩进上下文里），它会被后面的「JS 段头检索」误认成
+    # JS 段的段头 → upsert 把 600KB 仓库模块代码整段当成 JS 块替换掉。
+    # 2026-11-03 00:07 夜间链路实测事故：index.html 1,348,490 → 716,135 字节，页面崩、
+    # 后面注入步骤连着失败。根因就是段头混淆 + 删除右边界越界，两个都要防。
+    hp = html.rfind("\n/* =====", 0, i)
+    assert hp >= 0, "css block head missing"
+    st = hp + 1
+    r = html.find("#lv1WhLayer .fm-asp-empty{", i)
+    assert r > i, "css last rule missing"
+    e = html.find("}", r)
+    assert e > r, "css last rule end missing"
+    e += 1
+    if html[e:e + 2] == "\r\n":
+        e += 2                        # 连块尾换行一起删：插入时块尾自带换行，删/插必须严格互补
+    html = html[:st] + html[e:]
     cstat = "moved"
-k = html.find("/* ===== SKU ")
-assert k > 0, "css insert anchor missing"
+# 插入锚点同样必须落在行首：新插入的 CSS 段头前面不能带空格
+ap = html.find("\n/* ===== SKU ")
+assert ap >= 0, "css insert anchor missing"
+k = ap + 1
 html = html[:k] + css_new + html[k:]
 
 # --- 3) JS 函数 ---
-html, jstat = upsert(html,
-                     "  /* ===== 库龄 × 款号 矩阵（FBA 库存卡",
-                     "  function renderFbaByShop(){",
-                     crlf(JS))
+# 用 "var AGESP" 反查块首：CSS 段头与 JS 段头文字相同，只有 var AGESP 只出现在 JS 里，
+# 才不会认错块（见上面 2026-11-03 事故说明）。
+js_ag = html.find("  var AGESP = ")
+assert js_ag > 0, "js block missing"
+ag_ls = html.rfind("\n", 0, js_ag) + 1          # var AGESP 所在行行首
+hdr_ls = html.rfind("\n", 0, ag_ls - 1) + 1    # 上一行行首 = JS 段头行首
+assert html[hdr_ls:].lstrip().startswith("/* ====="), "js block head missing"
+en_js = html.find("  function renderFbaByShop(){", js_ag)
+assert en_js > js_ag, "js end marker missing"
+html = html[:hdr_ls] + crlf(JS).strip("\r\n") + "\r\n" + html[en_js:]
+jstat = "replaced"
 
 # --- 4) FBA 卡：库龄结构（条+数字行）+ 款号明细块 ---
 # 先删掉所有历史遗留的「库龄 × 款号」块（重复插入会导致标题刷屏），再统一插入一份

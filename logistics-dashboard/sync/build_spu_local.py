@@ -4,7 +4,7 @@
 import json, io, os, sys, collections
 sys.stdout.reconfigure(encoding="utf-8")
 
-WS = r"D:\丁志浩minimax\.minimax\sessions\mvs_932857ad8b1748649104e680ab004996\workspace"
+WS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW = os.path.join(WS, "wh_raw")
 PAGE = os.path.join(WS, "shandi-v5", "index.html")
 

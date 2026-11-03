@@ -101,13 +101,24 @@ css_new = crlf(CSS).strip("\r\n") + "\r\n"
 i = html.find("#lv1WhLayer .fm-asp-tbl td.own{")
 cstat = "inserted"
 if i >= 0:
-    st = html.rfind("/* =====", 0, i)
-    en = html.find("\n/* ===== ", i)
-    assert st >= 0 and en > i, "css block bounds"
-    html = html[:st] + html[en + 1:]
+    # 精确删除本块：右边界 = 本块最后一条规则的闭合大括号。
+    # 旧写法拿「下一个 /*===== 」当右边界，且插入锚点没落在行首 → CSS 段头被缩进后
+    # 被后面的「JS 段头检索」误认，整段 600KB 仓库模块代码被当成 JS 块删掉。
+    # 2026-11-03 00:24 夜间链路实测事故：index.html 1,348,057 → 732,772 字节。
+    hp = html.rfind("\n/* =====", 0, i)
+    assert hp >= 0, "css block head missing"
+    st = hp + 1
+    r = html.find("#lv1WhLayer .fm-drill-b td .own{", i)
+    assert r > i, "css last rule missing"
+    e = html.find("}", r)
+    assert e > r, "css last rule end missing"
+    e += 1
+    html = html[:st] + html[e:]
     cstat = "moved"
-k = html.find("/* ===== SKU ")
-assert k > 0, "css insert anchor missing"
+# 插入锚点必须落在行首：新插入的段头前面不能带空格（否则会被 JS 段头检索误认）
+ap = html.find("\n/* ===== SKU ")
+assert ap >= 0, "css insert anchor missing"
+k = ap + 1
 html = html[:k] + css_new + html[k:]
 
 # --- 3) JS 助手函数 ---
@@ -116,13 +127,17 @@ OWNER_START = "  /* ===== SPU 运营标注（2026-10-29）"
 ASP_START = "  /* ===== 库龄 × 款号 矩阵（FBA 库存卡"
 RENDER_START = "  function renderFbaByShop(){"
 
-# 先删旧块（到下一个 "  /* ===== " 标记或 renderFbaByShop 为止）
-i = html.find(OWNER_START)
+# 块首用 "var SPU_OWNER_DEFAULT" 反查（这只出现在 JS 里）：段头被缩进也不会认错块
+i = html.find("  var SPU_OWNER_DEFAULT")
 if i >= 0:
+    ag_ls = html.rfind("\n", 0, i) + 1          # var 行行首
+    hdr_ls = html.rfind("\n", 0, ag_ls - 1) + 1  # 上一行行首 = JS 段头行首
+    assert html[hdr_ls:].lstrip().startswith("/* ====="), "owner js block head missing"
+    i = hdr_ls
     j = html.find("\n  /* ===== ", i)
-    k = html.find("\n" + RENDER_START, i)
-    if j < 0 or (k > 0 and k < j):
-        j = k
+    k2 = html.find("\n" + RENDER_START, i)
+    if j < 0 or (k2 > 0 and k2 < j):
+        j = k2
     assert j > i, "owner js block end missing"
     html = html[:i] + html[j + 1:]
     jstat = "replaced"

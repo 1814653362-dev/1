@@ -14,7 +14,7 @@
 """
 import io, os, re, sys
 
-WS = r"D:\丁志浩minimax\.minimax\sessions\mvs_932857ad8b1748649104e680ab004996\workspace"
+WS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IDX = os.path.join(WS, "shandi-v5", "index.html")
 
 OLD = """    /* 2026-11-02 小丁定：放开原来的「最近3个月」窗口，改成「只显示还在途的货件」。

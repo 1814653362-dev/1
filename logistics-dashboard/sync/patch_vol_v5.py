@@ -3,7 +3,7 @@
 import io, json, os, re, importlib.util, sys
 
 sys.stdout.reconfigure(encoding="utf-8")
-BASE = r"D:\丁志浩minimax\.minimax\sessions\mvs_932857ad8b1748649104e680ab004996\workspace"
+BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IDX = os.path.join(BASE, "shandi-v5", "index.html")
 
 spec = importlib.util.spec_from_file_location("bv5", os.path.join(BASE, "build_vol_v5.py"))

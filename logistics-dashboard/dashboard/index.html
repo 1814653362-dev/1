@@ -4,7 +4,7 @@
 
   <meta data-page-node-id="unreSF4X33IUBxwogfCPiR" charset="UTF-8">
   <meta data-page-node-id="UX1zei6SZRvJuHXsPVFym8" content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>杉迪供应链货流 · 物流数据集成系统</title>
+  <title>供应链货流 · 物流数据集成系统</title>
   <style data-page-node-id="QYQHDDsooqTMGailxWEiVN" data-pnid-children="C085kpVSDSmalwnov0f2uO">
 :root {
   --bg: #f5f7fa;
@@ -976,6 +976,22 @@ body.fm-drill-open{transition:padding-right .2s ease-out;}
     
 
 <style id="skuFinderStyle">
+
+
+
+/* ===== SPU 运营标注（2026-10-29） ===== */
+#lv1WhLayer .fm-asp-tbl td.own{color:#5c6b7a;font-size:12px;white-space:nowrap;}
+#lv1WhLayer .fm-asp-tbl td.own em{font-style:normal;display:inline-block;padding:1px 7px;border-radius:10px;
+  background:#eef3f7;color:#0d3b5c;font-size:11px;font-weight:600;}
+#lv1WhLayer .fm-pl .own{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;
+  background:#eef3f7;color:#0d3b5c;font-size:10.5px;font-weight:600;vertical-align:1px;flex:none;}
+#lv1WhLayer .fm-pl .n{display:flex;align-items:baseline;gap:6px;min-width:0;}
+#lv1WhLayer .fm-pl .fnn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+#lv1WhLayer .fm-drill-h .own{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:10px;
+  background:#eef3f7;color:#0d3b5c;font-size:12px;font-weight:600;}
+#lv1WhLayer .fm-drill-b td .own{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;
+  background:#eef3f7;color:#0d3b5c;font-size:10.5px;font-weight:600;white-space:nowrap;}
+
 /* ===== 库龄 × 款号 矩阵（FBA 库存卡 2026-10-29） ===== */
 #lv1WhLayer .fm-asp-tools{display:flex;align-items:center;gap:12px;margin-top:4px;flex-wrap:wrap;}
 #lv1WhLayer .fm-asp-min{display:flex;align-items:center;gap:6px;font-size:12px;color:#5c6b7a;}
@@ -1002,18 +1018,69 @@ body.fm-drill-open{transition:padding-right .2s ease-out;}
 #lv1WhLayer .fm-asp-tbl td.old{color:#c8102e;font-weight:600;border-left:1px solid #f0d4d8;}
 #lv1WhLayer .fm-asp-tbl tr.on td{background:#f2f8fd;}
 #lv1WhLayer .fm-asp-empty{padding:26px;text-align:center;color:#97a4b0;font-size:12.5px;}
-/* ===== SPU 运营标注（2026-10-29） ===== */
-#lv1WhLayer .fm-asp-tbl td.own{color:#5c6b7a;font-size:12px;white-space:nowrap;}
-#lv1WhLayer .fm-asp-tbl td.own em{font-style:normal;display:inline-block;padding:1px 7px;border-radius:10px;
-  background:#eef3f7;color:#0d3b5c;font-size:11px;font-weight:600;}
-#lv1WhLayer .fm-pl .own{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;
-  background:#eef3f7;color:#0d3b5c;font-size:10.5px;font-weight:600;vertical-align:1px;flex:none;}
-#lv1WhLayer .fm-pl .n{display:flex;align-items:baseline;gap:6px;min-width:0;}
-#lv1WhLayer .fm-pl .fnn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
-#lv1WhLayer .fm-drill-h .own{display:inline-block;margin-left:8px;padding:2px 8px;border-radius:10px;
-  background:#eef3f7;color:#0d3b5c;font-size:12px;font-weight:600;}
-#lv1WhLayer .fm-drill-b td .own{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:9px;
-  background:#eef3f7;color:#0d3b5c;font-size:10.5px;font-weight:600;white-space:nowrap;}
+/* ===== 店级库龄结构趋势·样式（2026-11-02） ===== */
+/* 五段色复用现有库龄条同一套 R5（ACOL），本块只管版式 */
+#lv1WhLayer .fm-aget-wrap{margin:0 0 6px;}
+/* 行卡片：§8 页面卡片形制 */
+#lv1WhLayer .fm-aget-row{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:14px;
+  padding:14px 16px 10px;margin-bottom:10px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06),inset 0 1px 0 rgba(255,255,255,.9);}
+#lv1WhLayer .fm-aget-hd{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+#lv1WhLayer .fm-aget-name{font-size:13px;font-weight:700;color:#0d3b5c;cursor:pointer;}
+#lv1WhLayer .fm-aget-name:hover{text-decoration:underline;}
+#lv1WhLayer .fm-aget-max{font-size:11.5px;font-weight:400;color:#5c6b7a;font-variant-numeric:tabular-nums;margin-left:auto;}
+#lv1WhLayer .fm-aget-svg{display:block;width:100%;height:auto;overflow:visible;}
+#lv1WhLayer .fm-aget-svg rect.fm-aget-seg{cursor:pointer;}
+#lv1WhLayer .fm-aget-svg rect.fm-aget-seg:hover{filter:brightness(.9);}
+#lv1WhLayer .fm-aget-axis{display:flex;margin-top:0;padding:0 17px;}
+#lv1WhLayer .fm-aget-axis span{flex:1 1 0;text-align:center;font-size:11px;color:#97a4b0;
+  font-variant-numeric:tabular-nums;white-space:nowrap;}
+/* 柱悬停气泡：§6 浅色玻璃 */
+#lv1WhLayer .fm-atrend-tip{position:fixed;z-index:100001;display:none;pointer-events:none;
+  background:rgba(255,255,255,.68);color:#16212e;
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.65);border-radius:10px;padding:8px 12px;
+  font-size:12.5px;box-shadow:0 12px 32px rgba(15,23,42,.16),0 1px 2px rgba(15,23,42,.05),inset 0 1px 0 rgba(255,255,255,.9);}
+#lv1WhLayer .fm-atrend-tip .at-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid rgba(15,23,42,.12);}
+#lv1WhLayer .fm-atrend-tip .at-hd b{font-size:12.5px;font-weight:700;color:#0d3b5c;}
+#lv1WhLayer .fm-atrend-tip .at-hd span{font-size:11.5px;color:#5c6b7a;font-variant-numeric:tabular-nums;}
+#lv1WhLayer .fm-atrend-tip .at-r{display:flex;justify-content:space-between;gap:16px;line-height:1.75;}
+#lv1WhLayer .fm-atrend-tip .at-r span{font-size:12px;color:#5c6b7a;}
+#lv1WhLayer .fm-atrend-tip .at-r b{font-size:13px;font-weight:700;color:#16212e;font-variant-numeric:tabular-nums;}
+#lv1WhLayer .fm-atrend-tip .at-r b i{font-style:normal;font-size:11px;font-weight:400;color:#97a4b0;margin-left:2px;}
+#lv1WhLayer .fm-atrend-tip .at-sum{border-top:1px solid rgba(15,23,42,.12);margin-top:5px;padding-top:5px;}
+/* 单段走势卡：形态照抄周趋势卡片 v2（白色半透明磨砂玻璃、只有一条曲线、无全屏遮罩） */
+#lv1WhLayer .fm-atrend-card{position:fixed;z-index:100000;pointer-events:auto;
+  width:min(460px,calc(100vw - 24px));padding:10px 14px 9px;
+  background:rgba(255,255,255,.68);color:#16212e;
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.65);border-radius:10px;
+  box-shadow:0 12px 32px rgba(15,23,42,.16),0 1px 2px rgba(15,23,42,.05),inset 0 1px 0 rgba(255,255,255,.9);
+  display:flex;flex-direction:column;}
+#lv1WhLayer .fm-atrend-head{display:flex;align-items:baseline;gap:8px;padding:0 0 8px;margin-bottom:5px;
+  border-bottom:1px solid rgba(15,23,42,.12);user-select:none;}
+#lv1WhLayer .fm-atrend-head b{font-size:13px;font-weight:700;color:#0d3b5c;}
+#lv1WhLayer .fm-atrend-head span{font-size:12px;color:#5c6b7a;}
+#lv1WhLayer .fm-atrend-x{margin-left:auto;width:22px;height:22px;border:0;border-radius:6px;background:transparent;
+  color:#97a4b0;font-size:16px;line-height:1;cursor:pointer;}
+#lv1WhLayer .fm-atrend-x:hover{background:rgba(13,59,92,.08);color:#0d3b5c;}
+#lv1WhLayer .fm-atrend-chart{height:190px;position:relative;}
+#lv1WhLayer .fm-atrend-chart svg{display:block;width:100%;height:100%;}
+#lv1WhLayer .fm-atrend-chart circle.hit{fill:transparent;cursor:pointer;}
+#lv1WhLayer .fm-atrend-axis{display:flex;justify-content:space-between;padding:2px 0 0;font-size:11px;color:#97a4b0;
+  font-variant-numeric:tabular-nums;}
+#lv1WhLayer .fm-atrend-empty{padding:38px 10px;text-align:center;font-size:12.5px;color:#97a4b0;}
+#lv1WhLayer .fm-atrend-ctip{position:fixed;z-index:100001;display:none;pointer-events:none;
+  background:rgba(255,255,255,.68);color:#16212e;
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.65);border-radius:10px;padding:6px 10px;
+  font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums;
+  box-shadow:0 12px 32px rgba(15,23,42,.16),0 1px 2px rgba(15,23,42,.05),inset 0 1px 0 rgba(255,255,255,.9);}
+#lv1WhLayer .fm-atrend-ctip b{font-size:14px;font-weight:700;margin-left:4px;}
+/* ===== 店级库龄结构趋势·样式 END ===== */
+
+
 /* ===== SPU 周度趋势·样式（2026-10-30） ===== */
 /* v2（2026-11-02 小丁要求）：弱化数据展示 —— 白色半透明磨砂玻璃浮层，卡内只留一条平滑库存波动曲线 */
 #lv1WhLayer .fm-asp-tbl td.tc{cursor:pointer;}
@@ -1764,6 +1831,7 @@ window.__SPUL={"all":{},"byWh":{}};
 window.__VOL = {"svg":"","capTotal":0,"used":0,"over":0,"pct":0,"resPack":0,"resBuy":0,"storable":0};
 window.__AGESPU = {"shops":{}};
 window.__TREND = {};
+window.__AGETREND = {"generatedAt":"","source":{},"ageBands":[],"weeks":[],"shops":[],"shopsMeta":{}};
 window.__SPUOWNER = {};
 
 (function(){
@@ -2161,22 +2229,20 @@ window.__SPUOWNER = {};
     });
     var h = '<div class="fm-asp-wrap"><div class="fm-asp-scroll"><table class="fm-asp-tbl"><thead><tr>';
     h += '<th class="l" data-k="spu">款号 SPU</th>';
-    h += '<th data-k="owner">运营</th>';
     for(i=0;i<keys.length;i++){
       var on = (sk === "c" + i) ? " on" : "";
       h += '<th data-k="c' + i + '" class="' + on + '"><span class="sn">' + keys[i] + '</span>'
         + '<span class="sc">' + B[i].spuCount + ' 款号</span></th>';
     }
-    h += '<th data-k="old" class="' + (sk === "old" ? "on" : "") + '">老库龄</th>';
+    h += '<th data-k="old" class="' + (sk === "old" ? "on" : "") + '">271天以上</th>';
     h += '<th data-k="avail" class="' + (sk === "avail" ? "on" : "") + '">可售</th>';
     h += '<th data-k="total" class="' + (sk === "total" ? "on" : "") + '">总双数</th></tr></thead><tbody>';
     if(!list.length){
-      h += '<tr><td class="l" colspan="' + (keys.length + 5) + '" style="text-align:center;padding:24px;color:#97a4b0;">没有匹配的款号</td></tr>';
+      h += '<tr><td class="l" colspan="' + (keys.length + 4) + '" style="text-align:center;padding:24px;color:#97a4b0;">没有匹配的款号</td></tr>';
     }
     for(i=0;i<list.length && i<300;i++){
       var rr = list[i];
       h += '<tr><td class="l spu" data-spu="' + esc(rr.spu) + '">' + esc(rr.spu) + '</td>';
-      h += '<td class="own">' + (spuOwner(rr.spu) ? '<em>' + esc(spuOwner(rr.spu)) + '</em>' : '') + '</td>';
       for(j=0;j<keys.length;j++){
         var v = rr.cells[j] || 0;
         h += '<td class="tc" data-trend="c' + j + '">' + (v > 0 ? aspN(v) : "·") + '</td>';
@@ -2224,7 +2290,6 @@ window.__SPUOWNER = {};
           var k = th.getAttribute("data-k");
           if(k === "spu") AGESP.sort = "spu";
           else if(k.charAt(0) === "c"){ AGESP.sort = k; AGESP.seg = +k.slice(1); }
-          else if(k === "owner") AGESP.sort = "spu";
           else AGESP.sort = k;
           refresh();
         };
@@ -2344,8 +2409,8 @@ window.__SPUOWNER = {};
     el.innerHTML = h;
     if(!all){
       paintAgeBar(el, ga, pcts, ACOL, TCOL, TKEY, KEY);
-      bindAgeBar(el, ACOL, KEY);
       renderAgeSpu(el, fbaShopState.sid);
+      bindAgeBar(el, ACOL, KEY);
       renderSpuPie(el, fbaShopState.sid);
     }
   }
@@ -5015,6 +5080,8 @@ var __engine = (function () {
       if (!sub.length) return;
       var a = skuAggregate(sub);
       a.region = reg; a.region_label = REGION_LABELS[reg];
+      a.ship_dates = shipDateList(sub);
+      a.ship_detail = shipDateDetail(sub);
       byRegion.push(a);
     });
     var byShip = [];
@@ -5023,6 +5090,8 @@ var __engine = (function () {
       if (!sub.length) return;
       var a = skuAggregate(sub);
       a.ship_type = st;
+      a.ship_dates = shipDateList(sub);
+      a.ship_detail = shipDateDetail(sub);
       byShip.push(a);
     });
     var shipments = matched.map(function (r) {
@@ -5031,6 +5100,7 @@ var __engine = (function () {
         shipper_warehouse_no: r.wh_no || "",
         region: r.region, region_label: REGION_LABELS[r.region],
         ship_type: isFast(r.ship_type) ? "快船" : "普船",
+        ship_date: r.ship_date || "",
         quantity: Number(r.quantity || 0), box_count: Number(r.box_count || 0),
         priced: r.total_freight !== null,
         fba_shipment_no: r.fba || "",
@@ -5798,6 +5868,51 @@ if (document.readyState !== "loading") {
   document.addEventListener("DOMContentLoaded", loadSkuList);
 }
 
+/* ---- 发货日期工具（2026-11-03：② 拆分表右侧要能看到发货日期，便于定位是哪批货） ---- */
+function shipMd(d) {
+  var s = String(d || "").trim();
+  if (s.length >= 10 && s.charAt(4) === "-") {
+    return String(parseInt(s.slice(5, 7), 10)) + "." + String(parseInt(s.slice(8, 10), 10));
+  }
+  return s;
+}
+function shipDateList(rows) {
+  var seen = {}, out = [];
+  (rows || []).forEach(function (r) {
+    var d = String(r.ship_date || "").trim();
+    if (!d || seen[d]) return;
+    seen[d] = 1; out.push(d);
+  });
+  out.sort(function (a, b) { return a < b ? 1 : (a > b ? -1 : 0); });
+  var res = [], last = "";
+  out.forEach(function (d) {
+    var m = shipMd(d);
+    if (m === last) return;
+    last = m; res.push(m);
+  });
+  return res;
+}
+function shipDateDetail(rows) {
+  var by = {}, keys = [];
+  (rows || []).forEach(function (r) {
+    var d = String(r.ship_date || "").trim();
+    if (!d) return;
+    if (!by[d]) { by[d] = { qty: 0, fba: [] }; keys.push(d); }
+    by[d].qty += Number(r.quantity || 0);
+    var f = String(r.fba || "").split("&")[0];
+    if (f && by[d].fba.indexOf(f) < 0) by[d].fba.push(f);
+  });
+  keys.sort(function (a, b) { return a < b ? 1 : (a > b ? -1 : 0); });
+  return keys.map(function (k) {
+    return shipMd(k) + "：" + (by[k].fba.join("、") || "—") + "（" + by[k].qty + "件）";
+  }).join("；");
+}
+function shipDatesText(list) {
+  if (!list || !list.length) return "—";
+  var s = list.slice(0, 6).join("、");
+  if (list.length > 6) s += " 等" + list.length + "个";
+  return s;
+}
 // SKU 物流成本测算：输入 SKU → 汇总运费总和与件数 → 推算单件运费
 async function calcSkuCost() {
   const skuVal = document.getElementById("sku").value.trim();
@@ -5851,8 +5966,8 @@ async function calcSkuCost() {
         <div class="cost-err-b">这些货件在发货记录表里的<b>费用三项有缺失<\/b>，总运费无法确定。
         下面的单件运费<b>只反映 ${data.priced_records} \/ ${data.matched_records} 条已确认价格的货件<\/b>，
         待价格补齐后重算。补价位置：发货记录表对应行的「报关费」「拖车费」「物流费」三列。<\/div>
-        <table class="result-table cost-err-t"><thead><tr><th>月份<\/th><th>仓点<\/th><th>进仓编号<\/th><th>FBA货件号<\/th><th>件数<\/th><th>缺失费用项<\/th><\/tr><\/thead><tbody>
-          ${un.map(s => `<tr><td>${s.source_sheet || "—"}<\/td><td><code>${s.warehouse_code}<\/code><\/td><td>${s.shipper_warehouse_no || "—"}<\/td><td>${(s.fba_shipment_no || "—").split("&")[0]}<\/td><td>${s.quantity}<\/td><td class="cost-err-mf">${(s.missing_fees || []).join("、") || "费用三项全空"}<\/td><\/tr>`).join("")}
+        <table class="result-table cost-err-t"><thead><tr><th>月份<\/th><th>发货日期<\/th><th>仓点<\/th><th>进仓编号<\/th><th>FBA货件号<\/th><th>件数<\/th><th>缺失费用项<\/th><\/tr><\/thead><tbody>
+          ${un.map(s => `<tr><td>${s.source_sheet || "—"}<\/td><td>${shipMd(s.ship_date) || "—"}<\/td><td><code>${s.warehouse_code}<\/code><\/td><td>${s.shipper_warehouse_no || "—"}<\/td><td>${(s.fba_shipment_no || "—").split("&")[0]}<\/td><td>${s.quantity}<\/td><td class="cost-err-mf">${(s.missing_fees || []).join("、") || "费用三项全空"}<\/td><\/tr>`).join("")}
         <\/tbody><\/table><\/div>`;
     }
     // 头条：SKU 单件运费
@@ -5862,7 +5977,7 @@ async function calcSkuCost() {
     if (data.by_region && data.by_region.length) {
       html += `<h3 class="cat-head">按地区拆分<\/h3>`;
       html += `<table class="result-table"><tr>
-        <th>地区<\/th><th>记录数<\/th><th>单件运费(元/件)<\/th>
+        <th>地区<\/th><th>记录数<\/th><th>单件运费(元/件)<\/th><th>发货日期<\/th>
       <\/tr>`;
       for (const it of data.by_region) {
         const pp = it.per_unit_freight == null ? "—" : `¥${it.per_unit_freight.toFixed(4)}`;
@@ -5870,6 +5985,7 @@ async function calcSkuCost() {
           <td class="region-${it.region}">${it.region_label}<\/td>
           <td>${it.record_count}<\/td>
           <td><b>${pp}<\/b><\/td>
+          <td title="${String(it.ship_detail || "").replace(/"/g, "&quot;")}">${shipDatesText(it.ship_dates)}<\/td>
         <\/tr>`;
       }
       html += `<\/table>`;
@@ -5879,7 +5995,7 @@ async function calcSkuCost() {
     if (data.by_ship_type && data.by_ship_type.length) {
       html += `<h3 class="cat-head">按船型拆分<\/h3>`;
       html += `<table class="result-table"><tr>
-        <th>船型<\/th><th>记录数<\/th><th>单件运费(元/件)<\/th>
+        <th>船型<\/th><th>记录数<\/th><th>单件运费(元/件)<\/th><th>发货日期<\/th>
       <\/tr>`;
       for (const it of data.by_ship_type) {
         const pp = it.per_unit_freight == null ? "—" : `¥${it.per_unit_freight.toFixed(4)}`;
@@ -5887,6 +6003,7 @@ async function calcSkuCost() {
           <td>${it.ship_type}<\/td>
           <td>${it.record_count}<\/td>
           <td><b>${pp}<\/b><\/td>
+          <td title="${String(it.ship_detail || "").replace(/"/g, "&quot;")}">${shipDatesText(it.ship_dates)}<\/td>
         <\/tr>`;
       }
       html += `<\/table>`;
@@ -8823,6 +8940,22 @@ function closeResultModal() {
 #card-transit .map-controls button:active { transform: translateY(1px); }
 #card-transit .map-controls .placeholder { font-size: 11.5px; color: #97a4b0; }
 
+/* ---------- §8.7-补 ④ 阶段筛选 tab（与 §8.7-11 同一族规格，仅视觉） ---------- */
+#card-transit .wh-tabs { gap: 8px; margin: 10px 0 8px; }
+#card-transit .wh-tab {
+  height: 28px; padding: 0 14px;
+  border: 1px solid #e6ebf0; background: #ffffff; color: #5c6b7a;
+  border-radius: 999px; cursor: pointer; font-size: 12.5px; font-weight: 500;
+  display: inline-flex; align-items: center; gap: 4px; font-family: inherit;
+}
+#card-transit .wh-tab:hover { background: #f8fafc; color: #16212e; }
+#card-transit .wh-tab b { font-weight: 700; color: #16212e; font-variant-numeric: tabular-nums; }
+#card-transit .wh-tab.active {
+  background: color-mix(in srgb, var(--c, #2563eb) 12%, #ffffff);
+  border-color: color-mix(in srgb, var(--c, #2563eb) 45%, #ffffff);
+  color: #16212e; font-weight: 600;
+}
+
 /* ---------- §8.7-7 ④ 仓点气泡玻璃浮层（§6 浅色玻璃） ---------- */
 .wh-node-tip {
   position: fixed; z-index: 100002; display: none; pointer-events: none;
@@ -9050,12 +9183,386 @@ function closeResultModal() {
 </style>
 
 
+<script>
+/* ===== 店级库龄结构趋势·交互（2026-11-02） ===== */
+  (function(){
+    var A = window.__AGETREND || null;
+    /* 五段色 = 现有库龄条同一套 R5（ACOL），不另配色 */
+    var ACOL = ["#cfd8e0","#7cb6e6","#f0b429","#ef8080","#c8102e"];
+    var KEY  = ["0-90天","91-180天","181-270天","271-365天","365天以上"];
+    var BAD  = [false,false,false,true,true];
+    var host = document.getElementById("whFbaByShop");
+    var VW = 1120, PLOT = 96, BARW = 26;
 
+    function esc(s){
+      s = String(s == null ? "" : s);
+      return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+              .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+    }
+    function num(v){ return (Math.round(Number(v) || 0)).toLocaleString("en-US"); }
+    function day(s){ var p = String(s || "").split("-"); return p.length >= 3 ? (p[1] + "/" + p[2]) : String(s || ""); }
 
+    function weeks(){ return (A && A.weeks) || []; }
+    function shopById(sid){
+      if(!A || !A.shops) return null;
+      for(var i=0;i<A.shops.length;i++) if(String(A.shops[i].sid) === String(sid)) return A.shops[i];
+      return null;
+    }
+    /* 当前作用域：单店态＝该店一行；全部态＝每店一行。绝不合并 */
+    function scope(){
+      if(!A || !A.shops) return [];
+      var chip = host ? host.querySelector(".fm-chip.on[data-fmsid]") : null;
+      var sid = chip ? chip.getAttribute("data-fmsid") : "all";
+      if(sid && sid !== "all"){
+        var one = shopById(sid);
+        if(one) return [one];
+      }
+      return A.shops.slice();
+    }
+    /* 空周：oldPct == null（或没有该周记录）＝留白，不当 0 造柱 */
+    function recOf(sh, w){
+      for(var i=0;i<sh.weeks.length;i++) if(sh.weeks[i] === w) return sh.series[i];
+      return null;
+    }
+    function isEmpty(r){ return !r || r.oldPct == null; }
 
+    /* ---------- 柱 ---------- */
+    function rowSVG(sh){
+      var ws = weeks(), n = ws.length, i, k, r, v;
+      var slot = n ? (VW / n) : VW;
+      var bw = Math.min(BARW, Math.max(10, slot - 16));
+      var max = 0;
+      for(i=0;i<n;i++){
+        r = recOf(sh, ws[i]);
+        if(isEmpty(r)) continue;
+        v = Number(r.total) || 0;
+        if(v > max) max = v;
+      }
+      var s = '<svg class="fm-aget-svg" viewBox="0 0 ' + VW + ' ' + PLOT + '" role="img" aria-label="库龄结构趋势">';
+      if(max <= 0){
+        s += '<\/svg>';
+        return {svg:s, max:0};
+      }
+      for(i=0;i<n;i++){
+        r = recOf(sh, ws[i]);
+        if(isEmpty(r)) continue;                       /* 空周留白 */
+        var x = i * slot + (slot - bw) / 2;
+        s += '<rect class="fm-aget-hit" data-sid="' + esc(sh.sid) + '" data-i="' + i + '" data-w="' + esc(ws[i]) + '"'
+           + ' x="' + x.toFixed(1) + '" y="0" width="' + bw.toFixed(1) + '" height="' + PLOT + '" fill="transparent"/>';
+      }
+      for(i=0;i<n;i++){
+        r = recOf(sh, ws[i]);
+        if(isEmpty(r)) continue;
+        var x = i * slot + (slot - bw) / 2;
+        var acc = 0;
+        for(k=0;k<5;k++){
+          v = Number(r.bands[k]) || 0;
+          if(v <= 0) continue;
+          var h = Math.max((v / max) * PLOT, 2);
+          var y = PLOT - acc - h;
+          s += '<rect class="fm-aget-seg" data-sid="' + esc(sh.sid) + '" data-band="' + k + '" data-i="' + i + '"'
+             + ' data-w="' + esc(ws[i]) + '" x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '"'
+             + ' width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + ACOL[k] + '"/>';
+          acc += h;
+        }
+      }
+      s += '<\/svg>';
+      return {svg:s, max:max};
+    }
 
+    /* ---------- 模块渲染 ---------- */
+    function render(){
+      if(!A || !host) return;
+      if(!host.querySelector(".fm-chip")) return;      /* FBA 卡还没渲染，等它渲染完 */
+      var list = scope();
+      var sig = list.map(function(s){ return String(s.sid); }).join(",");
+      var wrap = host.querySelector("#fmAgeTrend");
+      if(wrap && wrap.getAttribute("data-sig") === sig) return;   /* 已是最新，直接返回（避免自循环） */
+      if(!wrap){
+        wrap = document.createElement("div");
+        wrap.id = "fmAgeTrend";
+        wrap.className = "fm-aget-wrap";
+      }
+      var anchor = host.querySelector(".fm-segrow");
+      if(anchor && anchor.parentNode) anchor.parentNode.insertBefore(wrap, anchor.nextSibling);
+      else{
+        /* 全部态：放在各店明细表之后（对比表在上、趋势总览在下，主次分明） */
+        var hero = host.querySelector(".fm-hero");
+        if(hero && hero.parentNode) hero.parentNode.insertBefore(wrap, hero.nextSibling);
+        else host.appendChild(wrap);
+      }
+      wrap.setAttribute("data-sig", sig);
 
+      var h = '';
 
+      var axis = '';
+      var ws = weeks();
+      for(var i=0;i<ws.length;i++) axis += '<span>' + esc(day(ws[i])) + '<\/span>';
+
+      for(var s2=0;s2<list.length;s2++){
+        var sh = list[s2];
+        var r = rowSVG(sh);
+        h += '<div class="fm-aget-row" data-sid="' + esc(sh.sid) + '">'
+          + '<div class="fm-aget-hd"><span class="fm-aget-name" data-goto="' + esc(sh.sid) + '">' + esc(sh.name || sh.sid) + '<\/span>'
+          + '<span class="fm-aget-max">峰值 ' + (r.max > 0 ? num(r.max) : "0") + ' 双<\/span><\/div>'
+          + r.svg + '<\/div>';
+      }
+      h += '<div class="fm-aget-axis">' + axis + '<\/div>';
+      wrap.innerHTML = h;
+    }
+
+    /* ---------- 气泡（§6 浅色玻璃） ---------- */
+    var tip = null;
+    function tipEl(){
+      if(!tip || !tip.parentNode){
+        tip = document.createElement("div");
+        tip.className = "fm-atrend-tip";
+        (document.getElementById("lv1WhLayer") || document.body).appendChild(tip);
+      }
+      return tip;
+    }
+    function hideTip(){ if(tip) tip.style.display = "none"; }
+    function showTip(sh, w, x, y){
+      var r = recOf(sh, w);
+      if(isEmpty(r)){ hideTip(); return; }
+      var t = tipEl();
+      var sum = 0, k;
+      for(k=0;k<5;k++) sum += (Number(r.bands[k]) || 0);
+      var h = '<div class="at-hd"><b>' + esc(sh.name || sh.sid) + '<\/b><span>' + esc(w) + '<\/span><\/div>';
+      for(k=0;k<5;k++){
+        var p = (sum > 0) ? ((Number(r.bands[k]) || 0) / sum * 100) : 0;
+        h += '<div class="at-r"><span>' + esc(KEY[k]) + '<\/span><b>' + p.toFixed(1) + '%<\/b><\/div>';
+      }
+      h += '<div class="at-r at-sum"><span>合计<\/span><b>' + (sum > 0 ? "100.0" : "0.0") + '%<\/b><\/div>';
+      t.innerHTML = h;
+      t.style.display = "block";
+      var tw = t.offsetWidth || 180, th = t.offsetHeight || 120;
+      t.style.left = Math.max(8, Math.min(window.innerWidth - tw - 8, x + 14)) + "px";
+      t.style.top = Math.max(8, Math.min(window.innerHeight - th - 8, y - th - 12)) + "px";
+    }
+
+    /* ---------- 单段走势卡（形态照抄周趋势卡片 v2） ---------- */
+    var card = null, cardAnchor = null;
+    function closeCard(){
+      if(card && card.parentNode) card.parentNode.removeChild(card);
+      var cs = document.querySelectorAll(".fm-atrend-ctip"), i;
+      for(i=0;i<cs.length;i++){ if(cs[i].parentNode) cs[i].parentNode.removeChild(cs[i]); }
+      card = null; cardAnchor = null;
+    }
+    function smooth(pts){
+      var n = pts.length, i, d;
+      if(!n) return "";
+      d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+      if(n === 1) return d;
+      for(i=0;i<n-1;i++){
+        var p0 = pts[i>0?i-1:0], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2<n?i+2:n-1];
+        var c1x = p1[0] + (p2[0]-p0[0])*0.16, c1y = p1[1] + (p2[1]-p0[1])*0.16;
+        var c2x = p2[0] - (p3[0]-p1[0])*0.16, c2y = p2[1] - (p3[1]-p1[1])*0.16;
+        d += " C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + "," + c2x.toFixed(1) + " " + c2y.toFixed(1)
+           + "," + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+      }
+      return d;
+    }
+    function curveSVG(series, bad, W, H){
+      W = W || 430; H = H || 190;
+      var PL = 42, PR = 16, PT = 14, PB = 16, n = series.length, i;
+      var max = 0, min = 1e18;
+      for(i=0;i<n;i++){ if(series[i].v > max) max = series[i].v; if(series[i].v < min) min = series[i].v; }
+      if(max <= 0) max = 1;
+      var lo = Math.max(0, min - (max - min) * 0.35);
+      if(max - lo < 1) lo = 0;
+      var iw = W - PL - PR, ih = H - PT - PB;
+      var step = n > 1 ? iw / (n - 1) : 0;
+      var color = bad ? "#c8102e" : "#0d3b5c";
+      var fill = bad ? "rgba(200,16,46,.09)" : "rgba(13,59,92,.09)";
+      var pts = [], d = "", area = "";
+      for(i=0;i<n;i++){
+        var x = PL + (n > 1 ? i * step : iw / 2);
+        var y = PT + ih - ((series[i].v - lo) / (max - lo)) * ih;
+        pts.push([x,y]);
+      }
+      d = smooth(pts);
+      area = d + " L" + pts[n-1][0].toFixed(1) + " " + (PT + ih) + " L" + pts[0][0].toFixed(1) + " " + (PT + ih) + " Z";
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="库龄段周走势">';
+      var g;
+      for(g=0;g<=3;g++){
+        var gy = PT + ih - ih * g / 3;
+        var gv = Math.round(lo + (max - lo) * g / 3);
+        s += '<line x1="' + PL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + gy.toFixed(1) + '" stroke="#eef2f6" stroke-width="1"/>';
+        s += '<text x="' + (PL - 8) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#a9b6c1">' + num(gv) + '<\/text>';
+      }
+      s += '<path d="' + area + '" fill="' + fill + '"/>';
+      s += '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+      for(i=0;i<n;i++){
+        var last = (i === n - 1);
+        s += '<circle cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="' + (last ? 4.2 : 2.4) + '" fill="' + (last ? color : "#fff") + '" stroke="' + color + '" stroke-width="1.8"/>';
+        s += '<circle class="hit" data-i="' + i + '" cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="10"/>';
+      }
+      var lx = pts[n-1][0], ly = pts[n-1][1];
+      var anchorEnd = (lx > W - 90) ? "end" : "start";
+      var tx = (anchorEnd === "end") ? lx - 9 : lx + 10;
+      s += '<text x="' + tx.toFixed(1) + '" y="' + (Math.max(PT + 11, ly - 10)).toFixed(1) + '" text-anchor="' + anchorEnd + '" font-size="12.5" font-weight="700" fill="' + color + '">' + num(series[n-1].v) + '<\/text>';
+      s += '<\/svg>';
+      return s;
+    }
+    function placeCard(el, anc){
+      if(!el) return;
+      var W = el.offsetWidth || 460, H = el.offsetHeight || 260, x, y;
+      var ar = (anc && anc.getBoundingClientRect) ? anc.getBoundingClientRect() : null;
+      if(ar){
+        x = ar.left + ar.width / 2 - W / 2;
+        y = ar.bottom + 10;
+        if(y + H > window.innerHeight - 12){
+          var y2 = ar.top - H - 10;
+          y = (y2 >= 12) ? y2 : Math.max(12, window.innerHeight - H - 12);
+        }
+      }else{
+        x = Math.max(12, (window.innerWidth - W) / 2);
+        y = Math.max(12, (window.innerHeight - H) / 2 - 30);
+      }
+      x = Math.min(Math.max(8, x), Math.max(8, window.innerWidth - W - 8));
+      y = Math.min(Math.max(8, y), Math.max(8, window.innerHeight - H - 8));
+      el.style.left = x + "px";
+      el.style.top = y + "px";
+    }
+    function openCard(sid, bandIdx, anc){
+      var sh = shopById(sid);
+      if(!sh) return;
+      closeCard();
+      /* 单段 13 周序列：空周不取、不插值 */
+      var series = [], ws = weeks(), i, r;
+      for(i=0;i<ws.length;i++){
+        r = recOf(sh, ws[i]);
+        if(isEmpty(r)) continue;
+        series.push({ d: ws[i], v: Number(r.bands[bandIdx]) || 0 });
+      }
+      var same = true;
+      for(i=1;i<series.length;i++){ if(series[i].v !== series[0].v){ same = false; break; } }
+      var draw = (series.length >= 2 && !same);      /* 各周完全相同就不画（显示「—」） */
+
+      var h = '<div class="fm-atrend-card">'
+        + '<div class="fm-atrend-head"><b>' + esc(sh.name || sh.sid) + '<\/b><span>' + esc(KEY[bandIdx]) + '<\/span>'
+        + '<button type="button" class="fm-atrend-x" aria-label="关闭">×<\/button><\/div>';
+      if(draw){
+        h += '<div class="fm-atrend-chart" id="fmAtrendChart"><\/div>'
+          + '<div class="fm-atrend-axis"><span>' + esc(day(series[0].d)) + '<\/span><span>'
+          + esc(day(series[series.length-1].d)) + '<\/span><\/div>';
+      }else{
+        h += '<div class="fm-atrend-empty">—<\/div>';
+      }
+      h += '<\/div>';
+
+      var holder = document.createElement("div");
+      holder.innerHTML = h;
+      card = holder.querySelector(".fm-atrend-card");
+      var layer = document.getElementById("lv1WhLayer") || document.body;
+      layer.appendChild(card);
+      cardAnchor = anc || null;
+      card.querySelector(".fm-atrend-x").addEventListener("click", function(e){ e.stopPropagation(); closeCard(); });
+      if(!draw){ placeCard(card, anc); return; }
+
+      var box = card.querySelector("#fmAtrendChart");
+      var cw = box.clientWidth || 430, ch = box.clientHeight || 190;
+      box.innerHTML = curveSVG(series, BAD[bandIdx], cw, ch);
+      var svg = box.querySelector("svg");
+      var ctip = document.createElement("div");
+      ctip.className = "fm-atrend-ctip";
+      layer.appendChild(ctip);
+      if(svg){
+        svg.addEventListener("mousemove", function(e){
+          var t = e.target;
+          if(!t || !t.getAttribute || !t.getAttribute("data-i")) return;
+          var idx = Number(t.getAttribute("data-i"));
+          if(!series[idx]) return;
+          ctip.innerHTML = esc(series[idx].d) + ' &nbsp;<b>' + num(series[idx].v) + '<\/b> 双';
+          ctip.style.display = "block";
+          ctip.style.left = Math.max(6, Math.min(window.innerWidth - ctip.offsetWidth - 8, e.clientX + 14)) + "px";
+          ctip.style.top = Math.max(6, e.clientY - 34) + "px";
+        });
+        svg.addEventListener("mouseleave", function(){ ctip.style.display = "none"; });
+      }
+      placeCard(card, anc);
+    }
+
+    /* ---------- 事件 ---------- */
+    document.addEventListener("mouseover", function(e){
+      var t = e.target;
+      if(!t || !t.getAttribute) return;
+      var i = t.getAttribute("data-i");
+      if(i == null) return;
+      var sid = t.getAttribute("data-sid"), w = t.getAttribute("data-w");
+      if(!sid || !w) return;
+      var sh = shopById(sid);
+      if(!sh) return;
+      showTip(sh, w, e.clientX, e.clientY);
+    });
+    document.addEventListener("mouseout", function(e){
+      var t = e.target;
+      if(t && t.getAttribute && t.getAttribute("data-i") != null) hideTip();
+    });
+    document.addEventListener("click", function(e){
+      var t = e.target;
+      if(!t || !t.getAttribute) return;
+      hideTip();                                   /* 点任何东西都收起气泡 */
+      /* 色段上的库龄档（data-band）；没有段切换按钮了 */
+      var tb = t.getAttribute("data-band");
+      /* 店名 → 切到页面顶部店铺筛选（走原有 chip，不新增流程） */
+      var gs = t.getAttribute("data-goto");
+      if(gs){
+        var chip = host ? host.querySelector(".fm-chip[data-fmsid='" + gs + "']") : null;
+        if(chip) chip.click();
+        return;
+      }
+      /* 点色段 → 单段走势卡 */
+      if(tb != null && t.getAttribute("data-sid")){
+        openCard(t.getAttribute("data-sid"), Number(tb), t);
+        return;
+      }
+    });
+    document.addEventListener("keydown", function(e){
+      if((e.key === "Escape" || e.keyCode === 27) && card){ closeCard(); }
+    });
+    if(!window.__atOutsideBound){
+      window.__atOutsideBound = 1;
+      document.addEventListener("pointerdown", function(e){
+        if(card){
+          var c = card;
+          var t = e.target;
+          if(t && t.closest && t.closest(".fm-atrend-card")) return;
+          closeCard();
+        }
+      }, true);
+    }
+    if(!window.__atFollowBound){
+      window.__atFollowBound = 1;
+      var follow = function(){
+        if(!card) return;
+        var a = cardAnchor;
+        if(a && a.getBoundingClientRect){
+          var r = a.getBoundingClientRect();
+          if(r.bottom < 0 || r.top > window.innerHeight){ closeCard(); return; }
+          placeCard(card, a);
+        }
+      };
+      window.addEventListener("scroll", follow, true);
+      window.addEventListener("resize", follow);
+    }
+
+    /* ---------- 挂载：FBA 卡重渲染时自动跟着重画 ---------- */
+    if(host){
+      if(window.MutationObserver){
+        var mo = new MutationObserver(function(){ render(); });
+        mo.observe(host, {childList:true});
+      }
+      render();
+    }
+    if(document.readyState === "loading"){
+      document.addEventListener("DOMContentLoaded", render);
+    }else{
+      setTimeout(render, 0);
+    }
+  })();
+</script>
 <script>
   /* ===== SPU 周度趋势·交互（2026-10-30） ===== */
   /* v2（2026-11-02 小丁要求）：
@@ -9069,7 +9576,7 @@ function closeResultModal() {
     c2:   {i:5, t:"181-270天", bad:false},
     c3:   {i:6, t:"271-365天", bad:true},
     c4:   {i:7, t:"365天以上", bad:true},
-    old:  {i:2, t:"老库龄",    bad:true},
+    old:  {i:2, t:"271天以上",  bad:true},
     avail:{i:0, t:"可售",      bad:false},
     total:{i:1, t:"总双数",    bad:false}
   };

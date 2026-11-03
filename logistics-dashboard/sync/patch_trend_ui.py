@@ -73,7 +73,7 @@ JS = r"""  /* ===== SPU 周度趋势·交互（2026-10-30） ===== */
     c2:   {i:5, t:"181-270天", bad:false},
     c3:   {i:6, t:"271-365天", bad:true},
     c4:   {i:7, t:"365天以上", bad:true},
-    old:  {i:2, t:"老库龄",    bad:true},
+    old:  {i:2, t:"271天以上",  bad:true},
     avail:{i:0, t:"可售",      bad:false},
     total:{i:1, t:"总双数",    bad:false}
   };
@@ -398,14 +398,22 @@ else:
 css_new = crlf(CSS).strip("\r\n") + "\r\n"
 mark = "/* ===== SPU 周度趋势·样式（2026-10-30） ===== */"
 if mark in html:
-    j = html.find("\n/* ===== ", html.find(mark))
-    assert j > 0
-    html = html[:html.find(mark)] + html[j + 1:]
+    # 右边界 = 本块最后一条规则的闭合大括号。旧写法用「下一个 /*===== 」当右边界，
+    # 一旦本块不在锚点旁边就会越界删掉几百 KB 页面代码（2026-11-03 夜间链路事故同款）。
+    mi = html.find(mark)
+    r = html.find(".fm-trend-empty{", mi)
+    assert r > mi, "trend css last rule missing"
+    e = html.find("}", r) + 1
+    if html[e:e + 2] == "\r\n":
+        e += 2                        # 连块尾换行一起删：插入时块尾自带换行，删/插必须严格互补
+    html = html[:mi] + html[e:]
     cstat = "moved"
 else:
     cstat = "inserted"
-k = html.find("/* ===== SKU 模糊搜索（2026-10-26）")
-assert k > 0, "css 插入锚点丢失"
+# 插入锚点必须落在行首：新插入的段头前面不能带空格（否则会被别的段头检索误认）
+ap = html.find("\n/* ===== SKU 模糊搜索（2026-10-26）")
+assert ap >= 0, "css 插入锚点丢失"
+k = ap + 1
 html = html[:k] + css_new + html[k:]
 
 # 3) JS：独立 <script> 块插在 </body> 前（避开所有 patch 脚本的替换区间）

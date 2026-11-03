@@ -13,7 +13,7 @@
 """
 import io, os, re, sys
 
-WS = r"D:\丁志浩minimax\.minimax\sessions\mvs_932857ad8b1748649104e680ab004996\workspace"
+WS = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 IDX = os.path.join(WS, "shandi-v5", "index.html")
 html = io.open(IDX, encoding="utf-8").read()
 
