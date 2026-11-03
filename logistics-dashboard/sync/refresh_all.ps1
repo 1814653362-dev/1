@@ -1,4 +1,4 @@
-﻿# refresh_all.ps1 —— 一条命令刷新「供应链货流」站点全部领星数据
+﻿# refresh_all.ps1 —— 一条命令刷新「杉迪供应链货流」站点全部领星数据
 # 用法： powershell -NoProfile -ExecutionPolicy Bypass -File refresh_all.ps1 [-SkipFetch] [-SkipPublish]
 # 流程：领星抓取 → 快照/索引构建 → 主页注入 → 资料库记录刷新 → 发布 → 校验
 # 注意：输出改为「先整体捕获再取末尾 N 行」。旧写法用 | Select-Object -First N 会在截断时
@@ -39,7 +39,7 @@ Step 'FBA库龄×款号数据' "& `"$PY`" `"$WS\build_age_spu.py`"" 3
 Step 'FBA库龄×款号注入' "& `"$PY`" `"$WS\patch_age_spu_fba.py`"" 4
 Step 'SPU运营标注'   "& `"$PY`" `"$WS\patch_spu_owner.py`"" 4
 Step 'FBA指标风格统一' "& `"$PY`" `"$WS\patch_fba_kpi_style.py`"" 3
-Step '资料库发货记录' "& powershell -NoProfile -ExecutionPolicy Bypass -File `"$WS\refresh_data.ps1`" -PageUrl '$env:WB_PAGE_URL' -OutDir `"$WS\shandi-v5`"" 4
+Step '资料库发货记录' "& powershell -NoProfile -ExecutionPolicy Bypass -File `"$WS\refresh_data.ps1`" -PageUrl "$env:WB_PAGE_URL" -OutDir `"$WS\shandi-v5`"" 4
 Step '同步共享盘发货记录' "& powershell -NoProfile -ExecutionPolicy Bypass -File `"$WS\sync_share_xlsx.ps1`"" 2
 Step '生成发货记录主表' "& `"$PY`" `"$WS\build_records_from_share.py`"" 6
 
@@ -50,6 +50,8 @@ Step '店级库龄趋势数据' "& `"$PY`" `"$WS\build_age_trend.py`"" 6
 Step '店级库龄趋势注入' "& `"$PY`" `"$WS\patch_age_trend_ui.py`"" 4
 # 到仓进度补丁必须排在最后：前面任何步骤若整段替换 ⑥ SKU 批次面板的 JS，这里兜底补回
 Step '到仓进度修复'   "& `"$PY`" `"$WS\patch_sku_progress.py`"" 3
+# ② SKU成本统计：拆分表右侧加「发货日期」列（2026-11-03 小丁要求，便于定位是哪批货）
+Step '②发货日期列'   "& `"$PY`" `"$WS\patch_sku_shipdate.py`"" 4
 
 if (-not $SkipPublish) {
   Step '发布上线' "& `"$PY`" `"$WS\publish_update.py`"" 6
