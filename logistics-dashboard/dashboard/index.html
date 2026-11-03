@@ -9216,6 +9216,303 @@ function closeResultModal() {
 
 
 <script>
+  /* ===== SPU 周度趋势·交互（2026-10-30） ===== */
+  /* v2（2026-11-02 小丁要求）：
+     ① 弱化数据展示 —— 点开不再弹「KPI 三数 + 周度明细表」的大卡片，改为一张白色半透明磨砂玻璃
+        小卡片，卡内只有一条平滑的库存波动曲线（该 SPU 在该库龄段的双数波动），就地浮在被点的格子旁；
+     ② 修掉「日期 数量」气泡关卡片后不消失的 bug —— 以前每次开卡片都往层里塞一个新气泡，
+        关闭时只隐藏了第一个，于是页面上越积越多。 */
+  var TREND_META = {
+    c0:   {i:3, t:"0-90天",    bad:false},
+    c1:   {i:4, t:"91-180天",  bad:false},
+    c2:   {i:5, t:"181-270天", bad:false},
+    c3:   {i:6, t:"271-365天", bad:true},
+    c4:   {i:7, t:"365天以上", bad:true},
+    old:  {i:2, t:"271天以上",  bad:true},
+    avail:{i:0, t:"可售",      bad:false},
+    total:{i:1, t:"总双数",    bad:false}
+  };
+
+  function tEsc(s){
+    s = String(s == null ? "" : s);
+    var o = "", i, c;
+    for(i = 0; i < s.length; i++){
+      c = s.charAt(i);
+      if(c === "&") o += "&amp;";
+      else if(c === "<") o += "&lt;";
+      else if(c === ">") o += "&gt;";
+      else if(c === '"') o += "&quot;";
+      else if(c === "'") o += "&#39;";
+      else o += c;
+    }
+    return o;
+  }
+
+  /* 关闭：卡片与气泡一律从 DOM 移除（只隐藏第一个气泡就是「关不掉」的根因） */
+  function tClose(){
+    var cards = document.querySelectorAll(".fm-trend-card"), i;
+    for(i = 0; i < cards.length; i++){ if(cards[i].parentNode) cards[i].parentNode.removeChild(cards[i]); }
+    var tips = document.querySelectorAll(".fm-trend-tip");
+    for(i = 0; i < tips.length; i++){ if(tips[i].parentNode) tips[i].parentNode.removeChild(tips[i]); }
+    window.__fmTrendAnchor = null;
+  }
+
+  function trendSeries(spu, metric, sid){
+    var T = window.__TREND || {};
+    var sh = T[String(sid)];
+    if(!sh || !sh.spu) return null;
+    var row = sh.spu[spu];
+    if(!row) return null;
+    var meta = TREND_META[metric] || TREND_META.total;
+    var out = [];
+    for(var i = 0; i < sh.weeks.length; i++){
+      var r = row[i];
+      if(!r) continue;
+      out.push({ d: sh.weeks[i], v: Number(r[meta.i]) || 0 });
+    }
+    return out.length ? out : null;
+  }
+
+  function trendNum(v){
+    return (Math.round(Number(v) || 0)).toLocaleString("en-US");
+  }
+  function trendPct(cur, prev){
+    if(!prev) return cur > 0 ? "+100%" : "0%";
+    var p = (cur - prev) / prev * 100;
+    return (p >= 0 ? "+" : "") + p.toFixed(1) + "%";
+  }
+  function trendDay(s){
+    var p = String(s || "").split("-");
+    return p.length >= 3 ? (p[1] + "/" + p[2]) : String(s || "");
+  }
+  function trendFull(s){
+    var p = String(s || "").split("-");
+    return p.length >= 3 ? (p[0] + "-" + p[1] + "-" + p[2]) : String(s || "");
+  }
+
+  /* 平滑曲线：Catmull-Rom → 三次贝塞尔（原来是折线段 L） */
+  function trendSmooth(pts){
+    var n = pts.length, i, d;
+    if(!n) return "";
+    d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
+    if(n === 1) return d;
+    for(i = 0; i < n - 1; i++){
+      var p0 = pts[i > 0 ? i-1 : 0], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2 < n ? i+2 : n-1];
+      var c1x = p1[0] + (p2[0]-p0[0]) * 0.16, c1y = p1[1] + (p2[1]-p0[1]) * 0.16;
+      var c2x = p2[0] - (p3[0]-p1[0]) * 0.16, c2y = p2[1] - (p3[1]-p1[1]) * 0.16;
+      d += " C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + "," + c2x.toFixed(1) + " " + c2y.toFixed(1)
+         + "," + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
+    }
+    return d;
+  }
+
+  function trendChartSVG(series, bad, W, H){
+    W = W || 430; H = H || 190;
+    var PL = 42, PR = 16, PT = 14, PB = 16;
+    var n = series.length;
+    var max = 0, min = 1e18, i;
+    for(i = 0; i < n; i++){ if(series[i].v > max) max = series[i].v; if(series[i].v < min) min = series[i].v; }
+    if(max <= 0) max = 1;
+    var lo = Math.max(0, min - (max - min) * 0.35);
+    if(max - lo < 1) lo = 0;
+    var iw = W - PL - PR, ih = H - PT - PB;
+    var step = n > 1 ? iw / (n - 1) : 0;
+    var color = bad ? "#c8102e" : "#0d3b5c";
+    var fill = bad ? "rgba(200,16,46,.09)" : "rgba(13,59,92,.09)";
+    var pts = [], d = "", area = "";
+    for(i = 0; i < n; i++){
+      var x = PL + (n > 1 ? i * step : iw / 2);
+      var y = PT + ih - ((series[i].v - lo) / (max - lo)) * ih;
+      pts.push([x, y]);
+    }
+    d = trendSmooth(pts);
+    area = d + " L" + pts[n-1][0].toFixed(1) + " " + (PT + ih) + " L" + pts[0][0].toFixed(1) + " " + (PT + ih) + " Z";
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="周度趋势">';
+    s += '<line class="hl" x1="0" y1="0" x2="0" y2="' + (PT + ih) + '" style="display:none"/>';
+    s += '<g class="ax">';
+    var g;
+    for(g = 0; g <= 3; g++){
+      var gy = PT + ih - ih * g / 3;
+      var gv = Math.round(lo + (max - lo) * g / 3);
+      s += '<line x1="' + PL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + gy.toFixed(1) + '" stroke="#eef2f6" stroke-width="1"/>';
+      s += '<text x="' + (PL - 8) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#a9b6c1">' + trendNum(gv) + '</text>';
+    }
+    s += '<path d="' + area + '" fill="' + fill + '"/>';
+    s += '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
+    for(i = 0; i < n; i++){
+      var last = (i === n - 1);
+      s += '<circle cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="' + (last ? 4.2 : 2.4) + '" fill="' + (last ? color : "#fff") + '" stroke="' + color + '" stroke-width="1.8"/>';
+      s += '<circle class="hit" data-i="' + i + '" cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="10"/>';
+    }
+    var lx = pts[n-1][0], ly = pts[n-1][1];
+    var anchor = (lx > W - 90) ? "end" : "start";
+    var tx = (anchor === "end") ? lx - 9 : lx + 10;
+    s += '<text x="' + tx.toFixed(1) + '" y="' + (Math.max(PT + 11, ly - 10)).toFixed(1) + '" text-anchor="' + anchor + '" font-size="12.5" font-weight="700" fill="' + color + '">' + trendNum(series[n-1].v) + '</text>';
+    s += '</g></svg>';
+    return s;
+  }
+
+  /* 就地摆放：贴着被点的格子；下方放得下就下方，上方够就上方，两边都不够就选空间大的一边 */
+  function trendPlace(card, anchor){
+    if(!card) return;
+    var W = card.offsetWidth || 460, H = card.offsetHeight || 260, x, y;
+    var ar = (anchor && anchor.getBoundingClientRect) ? anchor.getBoundingClientRect() : null;
+    if(ar){
+      x = ar.left + ar.width / 2 - W / 2;
+      y = ar.bottom + 10;
+      if(y + H > window.innerHeight - 12){
+        var y2 = ar.top - H - 10;
+        y = (y2 >= 12) ? y2 : Math.max(12, window.innerHeight - H - 12);
+      }
+    }else{
+      x = Math.max(12, (window.innerWidth - W) / 2);
+      y = Math.max(12, (window.innerHeight - H) / 2 - 30);
+    }
+    x = Math.min(Math.max(8, x), Math.max(8, window.innerWidth - W - 8));
+    y = Math.min(Math.max(8, y), Math.max(8, window.innerHeight - H - 8));
+    card.style.left = x + "px";
+    card.style.top = y + "px";
+  }
+
+  function trendOpen(spu, metric, sid, anchor){
+    var meta = TREND_META[metric] || TREND_META.total;
+    var series = trendSeries(spu, metric, sid);
+    tClose();
+    var host = document.getElementById("lv1WhLayer") || document.body;
+
+    var h = '<div class="fm-trend-card" data-spu="' + tEsc(spu) + '">'
+      + '<div class="fm-trend-head"><b>' + tEsc(spu) + '</b><span>' + tEsc(meta.t) + '</span>'
+      + '<button type="button" class="fm-trend-x" aria-label="关闭">×</button></div>';
+    if(!series){
+      h += '<div class="fm-trend-empty">暂无历史数据<\/div>';
+    }else{
+      h += '<div class="fm-trend-chart" id="fmTrendChart"><\/div>'
+        + '<div class="fm-trend-axis"><span>' + tEsc(trendDay(series[0].d)) + '</span><span>'
+        + tEsc(trendDay(series[series.length - 1].d)) + '</span></div>';
+    }
+    h += '<\/div><div class="fm-trend-tip"><\/div>';
+
+    var wrap = document.createElement("div");
+    wrap.innerHTML = h;
+    var card = wrap.querySelector(".fm-trend-card");
+    var tip = wrap.querySelector(".fm-trend-tip");
+    host.appendChild(card);
+    host.appendChild(tip);
+    window.__fmTrendAnchor = anchor || null;
+
+    card.querySelector(".fm-trend-x").addEventListener("click", function(e){
+      e.stopPropagation();
+      tClose();
+    });
+
+    if(!series){ trendPlace(card, anchor); return; }
+
+    var chartBox = card.querySelector("#fmTrendChart");
+    var svg = null;
+    if(chartBox){
+      var cw = chartBox.clientWidth || 430;
+      var ch = chartBox.clientHeight || 190;
+      chartBox.innerHTML = trendChartSVG(series, meta.bad, cw, ch);
+      svg = chartBox.querySelector("svg");
+    }
+    var hl = card.querySelector("line.hl");
+
+    /* SVG 坐标换算：viewBox 与容器尺寸不一定同比例（preserveAspectRatio 会留边），
+       必须按「等比缩放 + 居中」换算，否则虚线（viewBox 单位）和节点（屏幕像素）对不齐 */
+    function trendMap(){
+      if(!svg) return null;
+      var hb = svg.getBoundingClientRect();
+      var a = (svg.getAttribute("viewBox") || "0 0 430 190").split(/\s+/);
+      var x0 = Number(a[0]) || 0, y0 = Number(a[1]) || 0;
+      var vw = Number(a[2]) || 430, vh = Number(a[3]) || 190;
+      var sc = Math.min(hb.width / vw, hb.height / vh);
+      if(!(sc > 0)) sc = 1;
+      var offX = hb.left + (hb.width - vw * sc) / 2;
+      var offY = hb.top + (hb.height - vh * sc) / 2;
+      return { x0:x0, y0:y0, vw:vw, vh:vh, sc:sc, offX:offX, offY:offY };
+    }
+    function focusPoint(i){
+      if(i == null || !series[i]) return;
+      var hits = card.querySelectorAll("circle.hit");
+      var c = hits[i];
+      if(!c) return;
+      var M = trendMap();
+      if(!M) return;
+      var ux = Number(c.getAttribute("cx")), uy = Number(c.getAttribute("cy"));
+      var px = M.offX + ux * M.sc, py = M.offY + uy * M.sc;
+      hl.setAttribute("x1", M.x0 + ux); hl.setAttribute("x2", M.x0 + ux);
+      hl.setAttribute("y1", M.y0); hl.setAttribute("y2", M.y0 + M.vh);
+      hl.style.display = "";
+      tip.innerHTML = tEsc(trendFull(series[i].d)) + " &nbsp;<b>" + trendNum(series[i].v) + "</b> 双";
+      tip.style.display = "block";
+      tip.style.left = Math.min(window.innerWidth - tip.offsetWidth - 8, px + 14) + "px";
+      tip.style.top = Math.max(6, py - 36) + "px";
+    }
+    if(svg){
+      svg.addEventListener("mousemove", function(e){
+        var t = e.target;
+        if(!t || !t.getAttribute || !t.getAttribute("data-i")) return;
+        focusPoint(Number(t.getAttribute("data-i")));
+      });
+      svg.addEventListener("mouseleave", function(){
+        if(hl) hl.style.display = "none";
+        tip.style.display = "none";
+      });
+    }
+    trendPlace(card, anchor);
+  }
+
+  /* ESC 关闭 */
+  document.addEventListener("keydown", function(e){
+    if((e.key === "Escape" || e.keyCode === 27) && document.querySelector(".fm-trend-card")){
+      tClose();
+    }
+  });
+
+  /* 点卡片外收起（只注册一次） */
+  if(!window.__fmTrendOutsideBound){
+    window.__fmTrendOutsideBound = 1;
+    document.addEventListener("pointerdown", function(e){
+      var c = document.querySelector(".fm-trend-card");
+      if(!c) return;
+      var t = e.target;
+      if(t && t.closest && t.closest(".fm-trend-card")) return;
+      tClose();
+    }, true);
+  }
+
+  /* 滚动/缩放时跟着锚点走；锚点滚出视口就收起 */
+  if(!window.__fmTrendFollowBound){
+    window.__fmTrendFollowBound = 1;
+    var follow = function(){
+      var c = document.querySelector(".fm-trend-card");
+      if(!c) return;
+      var a = window.__fmTrendAnchor;
+      if(a && a.getBoundingClientRect){
+        var r = a.getBoundingClientRect();
+        if(r.bottom < 0 || r.top > window.innerHeight){ tClose(); return; }
+        trendPlace(c, a);
+      }
+    };
+    window.addEventListener("scroll", follow, true);
+    window.addEventListener("resize", follow);
+  }
+
+  /* 全局事件委托：矩阵数值格可点（表头排序不受影响） */
+  document.addEventListener("click", function(e){
+    var td = (e.target && e.target.closest) ? e.target.closest("td[data-trend]") : null;
+    if(!td) return;
+    var tr = td.closest("tr");
+    if(!tr) return;
+    var spuTd = tr.querySelector("td.spu");
+    if(!spuTd) return;
+    var wrap = td.closest("#fmAgeSpu");
+    var sid = wrap ? (wrap.getAttribute("data-sid") || "") : "";
+    var spu = spuTd.getAttribute("data-spu") || (spuTd.textContent || "").trim();
+    trendOpen(spu, td.getAttribute("data-trend"), sid, td);
+  });
+</script>
+<script>
 /* ===== 店级库龄结构趋势·交互（2026-11-02） ===== */
   (function(){
     var A = window.__AGETREND || null;
@@ -9594,303 +9891,6 @@ function closeResultModal() {
       setTimeout(render, 0);
     }
   })();
-</script>
-<script>
-  /* ===== SPU 周度趋势·交互（2026-10-30） ===== */
-  /* v2（2026-11-02 小丁要求）：
-     ① 弱化数据展示 —— 点开不再弹「KPI 三数 + 周度明细表」的大卡片，改为一张白色半透明磨砂玻璃
-        小卡片，卡内只有一条平滑的库存波动曲线（该 SPU 在该库龄段的双数波动），就地浮在被点的格子旁；
-     ② 修掉「日期 数量」气泡关卡片后不消失的 bug —— 以前每次开卡片都往层里塞一个新气泡，
-        关闭时只隐藏了第一个，于是页面上越积越多。 */
-  var TREND_META = {
-    c0:   {i:3, t:"0-90天",    bad:false},
-    c1:   {i:4, t:"91-180天",  bad:false},
-    c2:   {i:5, t:"181-270天", bad:false},
-    c3:   {i:6, t:"271-365天", bad:true},
-    c4:   {i:7, t:"365天以上", bad:true},
-    old:  {i:2, t:"271天以上",  bad:true},
-    avail:{i:0, t:"可售",      bad:false},
-    total:{i:1, t:"总双数",    bad:false}
-  };
-
-  function tEsc(s){
-    s = String(s == null ? "" : s);
-    var o = "", i, c;
-    for(i = 0; i < s.length; i++){
-      c = s.charAt(i);
-      if(c === "&") o += "&amp;";
-      else if(c === "<") o += "&lt;";
-      else if(c === ">") o += "&gt;";
-      else if(c === '"') o += "&quot;";
-      else if(c === "'") o += "&#39;";
-      else o += c;
-    }
-    return o;
-  }
-
-  /* 关闭：卡片与气泡一律从 DOM 移除（只隐藏第一个气泡就是「关不掉」的根因） */
-  function tClose(){
-    var cards = document.querySelectorAll(".fm-trend-card"), i;
-    for(i = 0; i < cards.length; i++){ if(cards[i].parentNode) cards[i].parentNode.removeChild(cards[i]); }
-    var tips = document.querySelectorAll(".fm-trend-tip");
-    for(i = 0; i < tips.length; i++){ if(tips[i].parentNode) tips[i].parentNode.removeChild(tips[i]); }
-    window.__fmTrendAnchor = null;
-  }
-
-  function trendSeries(spu, metric, sid){
-    var T = window.__TREND || {};
-    var sh = T[String(sid)];
-    if(!sh || !sh.spu) return null;
-    var row = sh.spu[spu];
-    if(!row) return null;
-    var meta = TREND_META[metric] || TREND_META.total;
-    var out = [];
-    for(var i = 0; i < sh.weeks.length; i++){
-      var r = row[i];
-      if(!r) continue;
-      out.push({ d: sh.weeks[i], v: Number(r[meta.i]) || 0 });
-    }
-    return out.length ? out : null;
-  }
-
-  function trendNum(v){
-    return (Math.round(Number(v) || 0)).toLocaleString("en-US");
-  }
-  function trendPct(cur, prev){
-    if(!prev) return cur > 0 ? "+100%" : "0%";
-    var p = (cur - prev) / prev * 100;
-    return (p >= 0 ? "+" : "") + p.toFixed(1) + "%";
-  }
-  function trendDay(s){
-    var p = String(s || "").split("-");
-    return p.length >= 3 ? (p[1] + "/" + p[2]) : String(s || "");
-  }
-  function trendFull(s){
-    var p = String(s || "").split("-");
-    return p.length >= 3 ? (p[0] + "-" + p[1] + "-" + p[2]) : String(s || "");
-  }
-
-  /* 平滑曲线：Catmull-Rom → 三次贝塞尔（原来是折线段 L） */
-  function trendSmooth(pts){
-    var n = pts.length, i, d;
-    if(!n) return "";
-    d = "M" + pts[0][0].toFixed(1) + " " + pts[0][1].toFixed(1);
-    if(n === 1) return d;
-    for(i = 0; i < n - 1; i++){
-      var p0 = pts[i > 0 ? i-1 : 0], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2 < n ? i+2 : n-1];
-      var c1x = p1[0] + (p2[0]-p0[0]) * 0.16, c1y = p1[1] + (p2[1]-p0[1]) * 0.16;
-      var c2x = p2[0] - (p3[0]-p1[0]) * 0.16, c2y = p2[1] - (p3[1]-p1[1]) * 0.16;
-      d += " C" + c1x.toFixed(1) + " " + c1y.toFixed(1) + "," + c2x.toFixed(1) + " " + c2y.toFixed(1)
-         + "," + p2[0].toFixed(1) + " " + p2[1].toFixed(1);
-    }
-    return d;
-  }
-
-  function trendChartSVG(series, bad, W, H){
-    W = W || 430; H = H || 190;
-    var PL = 42, PR = 16, PT = 14, PB = 16;
-    var n = series.length;
-    var max = 0, min = 1e18, i;
-    for(i = 0; i < n; i++){ if(series[i].v > max) max = series[i].v; if(series[i].v < min) min = series[i].v; }
-    if(max <= 0) max = 1;
-    var lo = Math.max(0, min - (max - min) * 0.35);
-    if(max - lo < 1) lo = 0;
-    var iw = W - PL - PR, ih = H - PT - PB;
-    var step = n > 1 ? iw / (n - 1) : 0;
-    var color = bad ? "#c8102e" : "#0d3b5c";
-    var fill = bad ? "rgba(200,16,46,.09)" : "rgba(13,59,92,.09)";
-    var pts = [], d = "", area = "";
-    for(i = 0; i < n; i++){
-      var x = PL + (n > 1 ? i * step : iw / 2);
-      var y = PT + ih - ((series[i].v - lo) / (max - lo)) * ih;
-      pts.push([x, y]);
-    }
-    d = trendSmooth(pts);
-    area = d + " L" + pts[n-1][0].toFixed(1) + " " + (PT + ih) + " L" + pts[0][0].toFixed(1) + " " + (PT + ih) + " Z";
-    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="周度趋势">';
-    s += '<line class="hl" x1="0" y1="0" x2="0" y2="' + (PT + ih) + '" style="display:none"/>';
-    s += '<g class="ax">';
-    var g;
-    for(g = 0; g <= 3; g++){
-      var gy = PT + ih - ih * g / 3;
-      var gv = Math.round(lo + (max - lo) * g / 3);
-      s += '<line x1="' + PL + '" y1="' + gy.toFixed(1) + '" x2="' + (W - PR) + '" y2="' + gy.toFixed(1) + '" stroke="#eef2f6" stroke-width="1"/>';
-      s += '<text x="' + (PL - 8) + '" y="' + (gy + 4).toFixed(1) + '" text-anchor="end" font-size="10.5" fill="#a9b6c1">' + trendNum(gv) + '</text>';
-    }
-    s += '<path d="' + area + '" fill="' + fill + '"/>';
-    s += '<path d="' + d + '" fill="none" stroke="' + color + '" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>';
-    for(i = 0; i < n; i++){
-      var last = (i === n - 1);
-      s += '<circle cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="' + (last ? 4.2 : 2.4) + '" fill="' + (last ? color : "#fff") + '" stroke="' + color + '" stroke-width="1.8"/>';
-      s += '<circle class="hit" data-i="' + i + '" cx="' + pts[i][0].toFixed(1) + '" cy="' + pts[i][1].toFixed(1) + '" r="10"/>';
-    }
-    var lx = pts[n-1][0], ly = pts[n-1][1];
-    var anchor = (lx > W - 90) ? "end" : "start";
-    var tx = (anchor === "end") ? lx - 9 : lx + 10;
-    s += '<text x="' + tx.toFixed(1) + '" y="' + (Math.max(PT + 11, ly - 10)).toFixed(1) + '" text-anchor="' + anchor + '" font-size="12.5" font-weight="700" fill="' + color + '">' + trendNum(series[n-1].v) + '</text>';
-    s += '</g></svg>';
-    return s;
-  }
-
-  /* 就地摆放：贴着被点的格子；下方放得下就下方，上方够就上方，两边都不够就选空间大的一边 */
-  function trendPlace(card, anchor){
-    if(!card) return;
-    var W = card.offsetWidth || 460, H = card.offsetHeight || 260, x, y;
-    var ar = (anchor && anchor.getBoundingClientRect) ? anchor.getBoundingClientRect() : null;
-    if(ar){
-      x = ar.left + ar.width / 2 - W / 2;
-      y = ar.bottom + 10;
-      if(y + H > window.innerHeight - 12){
-        var y2 = ar.top - H - 10;
-        y = (y2 >= 12) ? y2 : Math.max(12, window.innerHeight - H - 12);
-      }
-    }else{
-      x = Math.max(12, (window.innerWidth - W) / 2);
-      y = Math.max(12, (window.innerHeight - H) / 2 - 30);
-    }
-    x = Math.min(Math.max(8, x), Math.max(8, window.innerWidth - W - 8));
-    y = Math.min(Math.max(8, y), Math.max(8, window.innerHeight - H - 8));
-    card.style.left = x + "px";
-    card.style.top = y + "px";
-  }
-
-  function trendOpen(spu, metric, sid, anchor){
-    var meta = TREND_META[metric] || TREND_META.total;
-    var series = trendSeries(spu, metric, sid);
-    tClose();
-    var host = document.getElementById("lv1WhLayer") || document.body;
-
-    var h = '<div class="fm-trend-card" data-spu="' + tEsc(spu) + '">'
-      + '<div class="fm-trend-head"><b>' + tEsc(spu) + '</b><span>' + tEsc(meta.t) + '</span>'
-      + '<button type="button" class="fm-trend-x" aria-label="关闭">×</button></div>';
-    if(!series){
-      h += '<div class="fm-trend-empty">暂无历史数据<\/div>';
-    }else{
-      h += '<div class="fm-trend-chart" id="fmTrendChart"><\/div>'
-        + '<div class="fm-trend-axis"><span>' + tEsc(trendDay(series[0].d)) + '</span><span>'
-        + tEsc(trendDay(series[series.length - 1].d)) + '</span></div>';
-    }
-    h += '<\/div><div class="fm-trend-tip"><\/div>';
-
-    var wrap = document.createElement("div");
-    wrap.innerHTML = h;
-    var card = wrap.querySelector(".fm-trend-card");
-    var tip = wrap.querySelector(".fm-trend-tip");
-    host.appendChild(card);
-    host.appendChild(tip);
-    window.__fmTrendAnchor = anchor || null;
-
-    card.querySelector(".fm-trend-x").addEventListener("click", function(e){
-      e.stopPropagation();
-      tClose();
-    });
-
-    if(!series){ trendPlace(card, anchor); return; }
-
-    var chartBox = card.querySelector("#fmTrendChart");
-    var svg = null;
-    if(chartBox){
-      var cw = chartBox.clientWidth || 430;
-      var ch = chartBox.clientHeight || 190;
-      chartBox.innerHTML = trendChartSVG(series, meta.bad, cw, ch);
-      svg = chartBox.querySelector("svg");
-    }
-    var hl = card.querySelector("line.hl");
-
-    /* SVG 坐标换算：viewBox 与容器尺寸不一定同比例（preserveAspectRatio 会留边），
-       必须按「等比缩放 + 居中」换算，否则虚线（viewBox 单位）和节点（屏幕像素）对不齐 */
-    function trendMap(){
-      if(!svg) return null;
-      var hb = svg.getBoundingClientRect();
-      var a = (svg.getAttribute("viewBox") || "0 0 430 190").split(/\s+/);
-      var x0 = Number(a[0]) || 0, y0 = Number(a[1]) || 0;
-      var vw = Number(a[2]) || 430, vh = Number(a[3]) || 190;
-      var sc = Math.min(hb.width / vw, hb.height / vh);
-      if(!(sc > 0)) sc = 1;
-      var offX = hb.left + (hb.width - vw * sc) / 2;
-      var offY = hb.top + (hb.height - vh * sc) / 2;
-      return { x0:x0, y0:y0, vw:vw, vh:vh, sc:sc, offX:offX, offY:offY };
-    }
-    function focusPoint(i){
-      if(i == null || !series[i]) return;
-      var hits = card.querySelectorAll("circle.hit");
-      var c = hits[i];
-      if(!c) return;
-      var M = trendMap();
-      if(!M) return;
-      var ux = Number(c.getAttribute("cx")), uy = Number(c.getAttribute("cy"));
-      var px = M.offX + ux * M.sc, py = M.offY + uy * M.sc;
-      hl.setAttribute("x1", M.x0 + ux); hl.setAttribute("x2", M.x0 + ux);
-      hl.setAttribute("y1", M.y0); hl.setAttribute("y2", M.y0 + M.vh);
-      hl.style.display = "";
-      tip.innerHTML = tEsc(trendFull(series[i].d)) + " &nbsp;<b>" + trendNum(series[i].v) + "</b> 双";
-      tip.style.display = "block";
-      tip.style.left = Math.min(window.innerWidth - tip.offsetWidth - 8, px + 14) + "px";
-      tip.style.top = Math.max(6, py - 36) + "px";
-    }
-    if(svg){
-      svg.addEventListener("mousemove", function(e){
-        var t = e.target;
-        if(!t || !t.getAttribute || !t.getAttribute("data-i")) return;
-        focusPoint(Number(t.getAttribute("data-i")));
-      });
-      svg.addEventListener("mouseleave", function(){
-        if(hl) hl.style.display = "none";
-        tip.style.display = "none";
-      });
-    }
-    trendPlace(card, anchor);
-  }
-
-  /* ESC 关闭 */
-  document.addEventListener("keydown", function(e){
-    if((e.key === "Escape" || e.keyCode === 27) && document.querySelector(".fm-trend-card")){
-      tClose();
-    }
-  });
-
-  /* 点卡片外收起（只注册一次） */
-  if(!window.__fmTrendOutsideBound){
-    window.__fmTrendOutsideBound = 1;
-    document.addEventListener("pointerdown", function(e){
-      var c = document.querySelector(".fm-trend-card");
-      if(!c) return;
-      var t = e.target;
-      if(t && t.closest && t.closest(".fm-trend-card")) return;
-      tClose();
-    }, true);
-  }
-
-  /* 滚动/缩放时跟着锚点走；锚点滚出视口就收起 */
-  if(!window.__fmTrendFollowBound){
-    window.__fmTrendFollowBound = 1;
-    var follow = function(){
-      var c = document.querySelector(".fm-trend-card");
-      if(!c) return;
-      var a = window.__fmTrendAnchor;
-      if(a && a.getBoundingClientRect){
-        var r = a.getBoundingClientRect();
-        if(r.bottom < 0 || r.top > window.innerHeight){ tClose(); return; }
-        trendPlace(c, a);
-      }
-    };
-    window.addEventListener("scroll", follow, true);
-    window.addEventListener("resize", follow);
-  }
-
-  /* 全局事件委托：矩阵数值格可点（表头排序不受影响） */
-  document.addEventListener("click", function(e){
-    var td = (e.target && e.target.closest) ? e.target.closest("td[data-trend]") : null;
-    if(!td) return;
-    var tr = td.closest("tr");
-    if(!tr) return;
-    var spuTd = tr.querySelector("td.spu");
-    if(!spuTd) return;
-    var wrap = td.closest("#fmAgeSpu");
-    var sid = wrap ? (wrap.getAttribute("data-sid") || "") : "";
-    var spu = spuTd.getAttribute("data-spu") || (spuTd.textContent || "").trim();
-    trendOpen(spu, td.getAttribute("data-trend"), sid, td);
-  });
 </script>
 </body>
 </html>

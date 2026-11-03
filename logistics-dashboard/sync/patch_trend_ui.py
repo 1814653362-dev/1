@@ -395,7 +395,9 @@ else:
     dstat = "inserted"
 
 # 2) CSS
-css_new = crlf(CSS).strip("\r\n") + "\r\n"
+# 本脚本读文件用通用换行（内存里全是 \n），注入的 CSS 也必须保持纯 \n，
+# 最后由 re.sub 统一转 CRLF。若混入真 \r\n，删除端匹配不到块尾换行 → 删/插不对称，每轮多一个空行（不幂等）。
+css_new = CSS.replace("\r\n", "\n").replace("\r", "\n").strip("\n") + "\n"
 mark = "/* ===== SPU 周度趋势·样式（2026-10-30） ===== */"
 if mark in html:
     # 右边界 = 本块最后一条规则的闭合大括号。旧写法用「下一个 /*===== 」当右边界，
@@ -404,8 +406,8 @@ if mark in html:
     r = html.find(".fm-trend-empty{", mi)
     assert r > mi, "trend css last rule missing"
     e = html.find("}", r) + 1
-    if html[e:e + 2] == "\r\n":
-        e += 2                        # 连块尾换行一起删：插入时块尾自带换行，删/插必须严格互补
+    if html[e:e + 1] == "\n":
+        e += 1                        # 连块尾换行一起删：插入时块尾自带换行，删/插必须严格互补
     html = html[:mi] + html[e:]
     cstat = "moved"
 else:
@@ -417,7 +419,9 @@ k = ap + 1
 html = html[:k] + css_new + html[k:]
 
 # 3) JS：独立 <script> 块插在 </body> 前（避开所有 patch 脚本的替换区间）
-JS_BLOCK = "<script>\n" + JS.strip("\r\n") + "\n</script>"
+# 同样保持纯 \n（内存统一换行，写回时统一转 CRLF）
+JS_SRC = JS.replace("\r\n", "\n").replace("\r", "\n").strip("\n")
+JS_BLOCK = "<script>\n" + JS_SRC + "\n</script>"
 i = html.find("/* ===== SPU 周度趋势·交互（2026-10-30） ===== */")
 if i >= 0:
     st = html.rfind("<script>", 0, i)
