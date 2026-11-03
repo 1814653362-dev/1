@@ -24,7 +24,9 @@ function Invoke-Lx3([string]$token,[string]$epPath,[string[]]$sellerIds,[hashtab
   Start-Sleep -Milliseconds 200; return $r
 }
 $token=Get-LxToken
-$SELL=@('A3PJ8DYS5ONTBE','A2WDCNHDA20LWO','A2VK2I8AIPUSCG','A2L8B6PJBXKCX0','A26E7UWKVZTJF4','A10IXXN9OB1NY4')
+# 领星店铺 ID（sellerId）列表：从环境变量读取，逗号分隔。取不到时退化为占位值。
+$SELL_RAW = if ($env:LX_SELLER_IDS) { $env:LX_SELLER_IDS } else { 'SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER' }
+$SELL = @($SELL_RAW -split ',' | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 $EP='/cost/center/ods/summary/query'
 $OUTDIR=Join-Path $PSScriptRoot 'wh_raw'
 

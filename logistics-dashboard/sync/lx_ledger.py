@@ -35,8 +35,12 @@ if not APP_ID or not APP_SECRET:
     raise SystemExit("缺少领星凭据：请设置环境变量 LX_APP_ID / LX_APP_SECRET（见 .env.example）")
 API = "https://openapi.lingxing.com"
 EP = "/cost/center/ods/summary/query"
-SELLERS = ["A3PJ8DYS5ONTBE", "A2WDCNHDA20LWO", "A2VK2I8AIPUSCG",
-           "A2L8B6PJBXKCX0", "A26E7UWKVZTJF4", "A10IXXN9OB1NY4"]
+# 领星店铺 ID（sellerId）列表：从环境变量读取，逗号分隔。
+# 取不到时退化为占位值（脚本仍可运行，但接口查询会返回空）——按自己账号填 .env。
+SELLERS = [s.strip() for s in os.environ.get(
+    "LX_SELLER_IDS", "SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,"
+                     "SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER,SELLER_ID_PLACEHOLDER").split(",")
+           if s.strip()]
 CACHE = os.path.join(BASE, "wh_raw", "ledger_cache")
 
 # 每条记录保留的字段（顺序固定）—— 左边是缓存字段名，右边是接口原始字段名
