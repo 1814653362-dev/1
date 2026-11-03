@@ -1,0 +1,111 @@
+/* ---------- 库龄库存报告·共享样式（2026-11-03）
+   独立 HTML 报告与站点页面模块共用这一份样式，作用域统一挂 .ar-wrap
+   视觉规范：§6 浅色玻璃浮层 + §8 页面卡片白底描边柔影
+   红线：字号不得 < 11px；表头与数字同列视觉居中；空区留白；只出数字与单位 */
+
+.ar-wrap{--ar-line:rgba(15,23,42,.12);--ar-soft:#5c6b7a;--ar-mute:#97a4b0;
+  --ar-ink:#16212e;--ar-blue:#0d3b5c;--ar-red:#c8102e;color:var(--ar-ink);
+  font:13px/1.6 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;}
+.ar-wrap *{box-sizing:border-box;}
+.ar-wrap h1{font-size:20px;font-weight:700;color:var(--ar-blue);margin:0 0 6px;}
+.ar-wrap h2{font-size:15px;font-weight:700;color:var(--ar-ink);margin:20px 0 8px;
+  padding-left:9px;border-left:4px solid var(--ar-blue);}
+.ar-wrap h3{font-size:13.5px;font-weight:700;color:var(--ar-ink);margin:14px 0 6px;}
+.ar-wrap .ar-meta{font-size:11.5px;color:var(--ar-mute);margin-bottom:12px;
+  font-variant-numeric:tabular-nums;}
+.ar-wrap .ar-tip{font-size:11px;color:var(--ar-mute);margin-top:6px;}
+
+/* KPI 区（§8.3） */
+.ar-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:8px;}
+.ar-kpi{background:#f8fafc;border:1px solid rgba(15,23,42,.08);border-radius:8px;
+  padding:12px 14px;}
+.ar-kpi b{display:block;font-size:18px;font-weight:700;color:var(--ar-blue);
+  font-variant-numeric:tabular-nums;line-height:1.3;}
+.ar-kpi b i{font-style:normal;font-size:11.5px;font-weight:400;color:var(--ar-soft);
+  margin-left:3px;}
+.ar-kpi span{display:block;font-size:11.5px;color:var(--ar-soft);margin-top:3px;}
+.ar-kpi.warn b{color:var(--ar-red);}
+
+/* 页面卡片（§8.1） */
+.ar-card{background:#ffffff;border:1px solid rgba(15,23,42,.08);border-radius:14px;
+  padding:18px 20px;margin:0 0 12px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06),
+    inset 0 1px 0 rgba(255,255,255,.9);}
+
+/* 表格区（§8.4） */
+.ar-tblwrap{background:#fff;border:1px solid rgba(15,23,42,.08);border-radius:14px;
+  overflow:auto;max-height:560px;max-width:100%;
+  box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06),
+    inset 0 1px 0 rgba(255,255,255,.9);}
+.ar-wrap table{width:max-content;min-width:100%;border-collapse:collapse;font-size:13px;}
+.ar-wrap th,.ar-wrap td{text-align:center;white-space:nowrap;padding:9px 10px;
+  border-bottom:1px solid var(--ar-line);font-variant-numeric:tabular-nums;}
+.ar-wrap th{position:sticky;top:0;z-index:2;font-size:12px;font-weight:600;
+  color:var(--ar-soft);background:#eff6ff;}
+.ar-wrap td{font-weight:600;color:var(--ar-ink);}
+.ar-wrap th.l,.ar-wrap td.l{text-align:left;}
+.ar-wrap td.l b{font-weight:700;}
+/* 库龄变化列：双数 + 百分比，限宽不换行 */
+.ar-wrap td.chg{font-weight:600;max-width:132px;overflow:hidden;text-overflow:ellipsis;}
+.ar-wrap tbody tr:hover{background:rgba(13,59,92,.08);}
+.ar-wrap td.adv{text-align:left;white-space:normal;min-width:200px;max-width:280px;
+  font-weight:400;font-size:12px;color:var(--ar-ink);}
+/* 合格指标表：行数少，整表铺开，不出内滚动条 */
+.ar-wrap .ar-critwrap{max-height:none;}
+.ar-wrap table.ar-crit td:first-child{font-weight:600;color:var(--ar-ink);}
+
+/* 徽标 pill（§8.4） */
+.ar-tag{display:inline-block;padding:3px 9px;border-radius:999px;font-size:12px;
+  font-weight:600;}
+.ar-t-ok{background:#e7f5ec;color:#2f855a;}
+.ar-t-many{background:#fdf1dc;color:#b45309;}
+.ar-t-low{background:#e5f0f8;color:#2b6ea3;}
+.ar-t-bad{background:#fde8e8;color:var(--ar-red);}
+.ar-t-risk{background:#fde8e8;color:var(--ar-red);}
+.ar-t-tail{background:#f0f4f8;color:#5c6b7a;}
+
+/* 说明列表 */
+.ar-wrap ul.ar-notes{margin:6px 0 0 18px;padding:0;font-size:12px;color:var(--ar-ink);}
+.ar-wrap ul.ar-notes li{margin:4px 0;}
+
+/* 图例 */
+.ar-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ar-soft);
+  margin-top:6px;}
+.ar-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;}
+.ar-wrap svg{display:block;width:100%;height:auto;}
+
+/* 站点模块入口块（页面内） */
+.ar-entry{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:#ffffff;border:1px solid rgba(15,23,42,.08);border-radius:14px;
+  padding:14px 16px;margin:0 0 10px;
+  box-shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,92,.06),
+    inset 0 1px 0 rgba(255,255,255,.9);}
+.ar-entry-hd{display:flex;align-items:baseline;gap:8px;}
+.ar-entry-hd b{font-size:13px;font-weight:700;color:var(--ar-blue);}
+.ar-entry-hd span{font-size:11.5px;color:var(--ar-soft);}
+.ar-entry-kpis{display:flex;gap:18px;flex-wrap:wrap;margin-left:auto;}
+.ar-entry-kpis div{text-align:right;}
+.ar-entry-kpis b{display:block;font-size:16px;font-weight:700;color:var(--ar-blue);
+  font-variant-numeric:tabular-nums;line-height:1.3;}
+.ar-entry-kpis b i{font-style:normal;font-size:11.5px;font-weight:400;color:var(--ar-soft);
+  margin-left:2px;}
+.ar-entry-kpis span{display:block;font-size:11px;color:var(--ar-mute);margin-top:2px;}
+.ar-open-btn{height:28px;padding:0 14px;border:1px solid #e6ebf0;border-radius:8px;
+  background:#0d3b5c;color:#fff;font-size:12.5px;font-weight:600;cursor:pointer;}
+.ar-open-btn:hover{background:#134c73;}
+
+/* 报告弹窗：§6 浅色玻璃 token */
+.ar-modal{position:fixed;z-index:100002;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:min(1180px,calc(100vw - 24px));max-height:min(86vh,900px);overflow:auto;
+  pointer-events:auto;background:rgba(255,255,255,.68);color:var(--ar-ink);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid rgba(255,255,255,.65);border-radius:10px;padding:18px 20px;
+  box-shadow:0 12px 32px rgba(15,23,42,.16),0 1px 2px rgba(15,23,42,.05),
+    inset 0 1px 0 rgba(255,255,255,.9);}
+.ar-modal-hd{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;
+  padding-bottom:8px;border-bottom:1px solid var(--ar-line);}
+.ar-modal-hd b{font-size:16px;font-weight:700;color:var(--ar-blue);}
+.ar-modal-hd span{font-size:11.5px;color:var(--ar-soft);}
+.ar-modal-x{margin-left:auto;width:22px;height:22px;border:0;border-radius:6px;
+  background:transparent;color:var(--ar-soft);font-size:15px;line-height:1;cursor:pointer;}
+.ar-modal-x:hover{background:rgba(13,59,92,.08);color:var(--ar-blue);}

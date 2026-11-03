@@ -216,7 +216,7 @@ def main():
     # 实测口径：每行取 (sku 或 msku) 的 '-' 首段。
     # 账里的 SKU 命名有两种（同一批货）：
     #   sid=6574 用 seller_sku，形如 SD-2302153-BK-P-Z-7（带 SD- 前缀）
-    #   sid=13120 用 sku，      形如 2302153-RD-S-Z-8.5
+    #   sid=00001 用 sku，      形如 2302153-RD-S-Z-8.5
     # 所以这里登记**每个 SKU 字段** → SPU 键，账里用哪个字段名都能对上。
     sku2spu = {}
     for r in inv:
